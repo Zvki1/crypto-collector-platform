@@ -24,7 +24,7 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    buildCommand: npm install && npx prisma generate && npm run build collector
+    buildCommand: npm install && npx prisma generate && npx nest build collector
     startCommand: npx prisma migrate deploy && node dist/apps/collector/main.js
     envVars:
       - key: NODE_ENV
