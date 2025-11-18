@@ -1,0 +1,95 @@
+
+
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+// generator client {
+//   provider = "prisma-client"
+//   // output   = "../generated/prisma"
+// }
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+// ============================================
+// Cryptocurrency Model
+// ============================================
+model Cryptocurrency {
+  id            String   @id @default(uuid()) @db.Uuid
+  coingeckoId   String   @unique @map("coingecko_id") @db.VarChar(50)
+  symbol        String   @db.VarChar(10)
+  name          String   @db.VarChar(100)
+  image         String?  @db.Text
+  marketCapRank Int?     @map("market_cap_rank")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  marketData MarketData[]
+
+  @@index([symbol])
+  @@index([marketCapRank])
+  @@index([coingeckoId])
+  @@map("cryptocurrencies")
+}
+
+// ============================================
+// MarketData Model
+// ============================================
+model MarketData {
+  id                           String   @id @default(uuid()) @db.Uuid
+  cryptocurrencyId             String   @map("cryptocurrency_id") @db.Uuid
+  
+  // Prix
+  currentPrice                 Decimal  @map("current_price") @db.Decimal(20, 8)
+  high24h                      Decimal? @map("high_24h") @db.Decimal(20, 8)
+  low24h                       Decimal? @map("low_24h") @db.Decimal(20, 8)
+  priceChange24h               Decimal? @map("price_change_24h") @db.Decimal(20, 8)
+  priceChangePercentage24h     Decimal? @map("price_change_percentage_24h") @db.Decimal(10, 4)
+  priceChangePercentage1h      Decimal? @map("price_change_percentage_1h") @db.Decimal(10, 4)
+  
+  // Capitalisation
+  marketCap                    Decimal? @map("market_cap") @db.Decimal(22, 2)
+  fullyDilutedValuation        Decimal? @map("fully_diluted_valuation") @db.Decimal(22, 2)
+  totalVolume                  Decimal? @map("total_volume") @db.Decimal(22, 2)
+  marketCapChange24h           Decimal? @map("market_cap_change_24h") @db.Decimal(22, 2)
+  marketCapChangePercentage24h Decimal? @map("market_cap_change_percentage_24h") @db.Decimal(10, 4)
+  
+  // Supply
+  circulatingSupply            Decimal? @map("circulating_supply") @db.Decimal(20, 2)
+  totalSupply                  Decimal? @map("total_supply") @db.Decimal(20, 2)
+  maxSupply                    Decimal? @map("max_supply") @db.Decimal(20, 2)
+  
+  // All-Time High/Low
+  ath                          Decimal? @db.Decimal(20, 8)
+  athChangePercentage          Decimal? @map("ath_change_percentage") @db.Decimal(10, 4)
+  athDate                      DateTime? @map("ath_date")
+  atl                          Decimal? @db.Decimal(20, 8)
+  atlChangePercentage          Decimal? @map("atl_change_percentage") @db.Decimal(10, 4)
+  atlDate                      DateTime? @map("atl_date")
+  
+  // Métadonnées
+  timestamp                    DateTime
+  createdAt                    DateTime @default(now()) @map("created_at")
+
+  // Relations
+  cryptocurrency Cryptocurrency @relation(fields: [cryptocurrencyId], references: [id], onDelete: Cascade)
+
+  @@unique([cryptocurrencyId, timestamp], name: "uk_crypto_timestamp")
+  @@index([cryptocurrencyId])
+  @@index([timestamp(sort: Desc)])
+  @@index([cryptocurrencyId, timestamp(sort: Desc)])
+  @@map("market_data")
+}
