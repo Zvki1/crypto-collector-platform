@@ -4,6 +4,9 @@ databases:
     user: crypto_user
     plan: free
     region: frankfurt
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: allow all
 
 services:
   - type: redis
