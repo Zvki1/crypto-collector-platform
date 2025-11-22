@@ -93,3 +93,21 @@ model MarketData {
   @@index([cryptocurrencyId, timestamp(sort: Desc)])
   @@map("market_data")
 }
+
+
+// api models
+
+// ============================================
+// User Model
+// ============================================
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique @db.VarChar(255)
+  username  String   @unique @db.VarChar(50)
+  password  String   @db.VarChar(255)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([email])
+  @@map("users")
+}
