@@ -1,98 +1,341 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 📊 Crypto Collector Platform
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> Plateforme automatisée de collecte et d'analyse de données de cryptomonnaies en temps réel
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+[![NestJS](https://img.shields.io/badge/NestJS-11.0.1-E0234E?logo=nestjs)](https://nestjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7.3-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql)](https://www.postgresql.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.19.0-2D3748?logo=prisma)](https://www.prisma.io/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker)](https://www.docker.com/)
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🎯 Vue d'Ensemble
 
-## Project setup
+La **Crypto Collector Platform** est une solution complète de collecte et de stockage de données de marché pour les cryptomonnaies. Elle récupère automatiquement les informations depuis l'API CoinGecko toutes les 5 minutes et les stocke dans une base de données PostgreSQL pour analyse ultérieure.
 
-```bash
-$ npm install
+### ✨ Fonctionnalités Principales
+
+- 🔄 **Collecte automatique** toutes les 5 minutes (configurable)
+- 📊 **Suivi de Bitcoin, Ethereum et Solana**
+- 💾 **Stockage historique** dans PostgreSQL
+- 📈 **Données complètes**: prix, volumes, capitalisation, ATH/ATL, etc.
+- 🔍 **Dashboard de monitoring** (Bull Board)
+- 🐳 **Infrastructure Docker** complète
+- 🚀 **Architecture NestJS** modulaire et scalable
+
+---
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│             Docker Compose                      │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐     │
+│  │PostgreSQL│  │  Redis   │  │ PgAdmin  │     │
+│  │  :5432   │  │  :6379   │  │  :5050   │     │
+│  └──────────┘  └──────────┘  └──────────┘     │
+└─────────────────────────────────────────────────┘
+         ▲                              ▲
+         │                              │
+    ┌────┴─────┐                  ┌────┴─────┐
+    │Collector │                  │   API    │
+    │  :3001   │                  │  :3000   │
+    │          │                  │          │
+    │• Scheduler                  │• REST    │
+    │• Bull Queue                 │• CRUD    │
+    │• CoinGecko                  │          │
+    └──────────┘                  └──────────┘
 ```
 
-## Compile and run the project
+### 📁 Structure du Projet
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+crypto-collector-platform/
+├── apps/                    # Applications
+│   ├── collector/          # Service de collecte automatique
+│   └── api/               # API REST
+├── libs/                   # Librairies partagées
+│   ├── common/            # Services communs
+│   └── database/          # Module Prisma
+├── prisma/                # Schéma et migrations BDD
+├── docker/                # Configuration Docker
+└── docs/                  # Documentation complète
 ```
 
-## Run tests
+---
+
+## 🚀 Démarrage Rapide
+
+### Prérequis
+
+- **Node.js** v18+
+- **npm** v9+
+- **Docker** & **Docker Compose**
+
+### Installation
 
 ```bash
-# unit tests
-$ npm run test
+# 1. Cloner le repository
+git clone <repository-url>
+cd crypto-collector-platform
 
-# e2e tests
-$ npm run test:e2e
+# 2. Installer les dépendances
+npm install
 
-# test coverage
-$ npm run test:cov
+# 3. Configurer l'environnement
+cp .env.example .env
+# Éditer .env avec vos paramètres
+
+# 4. Démarrer l'infrastructure Docker
+docker-compose up -d
+
+# 5. Générer le client Prisma et exécuter les migrations
+npx prisma generate
+npx prisma migrate deploy
+
+# 6. Démarrer le Collector
+npm run start:dev collector
 ```
 
-## Deployment
+### Vérification
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Après le démarrage, vous devriez voir :
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+```
+✅ Collector is running and will collect data periodically
+📋 Bull Board dashboard: http://localhost:3001/admin/queues
+🚀 Crypto Collector starting...
+📊 Collecting data for: bitcoin, ethereum, solana
+⏱️  Collection interval: 5 minutes
+```
+
+---
+
+## 📊 Services Disponibles
+
+| Service        | URL                                | Description             |
+| -------------- | ---------------------------------- | ----------------------- |
+| **Collector**  | http://localhost:3001              | Service de collecte     |
+| **Bull Board** | http://localhost:3001/admin/queues | Dashboard de monitoring |
+| **API REST**   | http://localhost:3000              | API de consultation     |
+| **PgAdmin**    | http://localhost:5050              | Interface BDD           |
+| **PostgreSQL** | localhost:5432                     | Base de données         |
+| **Redis**      | localhost:6379                     | Queue backend           |
+
+### Credentials PgAdmin
+
+- **Email**: rzaki@hotmail.fr
+- **Password**: admin
+
+### Credentials PostgreSQL
+
+- **User**: crypto_user
+- **Password**: crypto_password_dev
+- **Database**: crypto_platform
+
+---
+
+## 🛠️ Commandes Disponibles
+
+### Développement
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Démarrer le Collector en mode développement
+npm run start:dev collector
+
+# Démarrer l'API en mode développement
+npm run start:dev api
+
+# Build toutes les applications
+npm run build
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Base de Données
 
-## Resources
+```bash
+# Interface graphique Prisma Studio
+npx prisma studio
 
-Check out a few resources that may come in handy when working with NestJS:
+# Créer une nouvelle migration
+npx prisma migrate dev --name migration_name
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# Appliquer les migrations
+npx prisma migrate deploy
 
-## Support
+# Générer le client Prisma
+npx prisma generate
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Tests
 
-## Stay in touch
+```bash
+# Tests unitaires
+npm run test
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Tests E2E
+npm run test:e2e
 
-## License
+# Coverage
+npm run test:cov
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Docker
+
+```bash
+# Démarrer tous les services
+docker-compose up -d
+
+# Arrêter tous les services
+docker-compose down
+
+# Voir les logs
+docker-compose logs -f
+
+# Voir le status
+docker-compose ps
+```
+
+### Linting & Formatting
+
+```bash
+# ESLint
+npm run lint
+
+# Prettier
+npm run format
+```
+
+---
+
+## 📚 Documentation
+
+Documentation complète disponible dans le dossier `docs/` :
+
+- **[PROJECT_DOCUMENTATION.md](docs/PROJECT_DOCUMENTATION.md)** - Documentation générale du projet
+- **[TECHNICAL_GUIDE.md](docs/TECHNICAL_GUIDE.md)** - Guide technique pour développeurs
+
+### Sujets Couverts
+
+- 🏛️ Architecture détaillée
+- 🔄 Flow de données complet
+- 🧩 Composants et services
+- 🗄️ Schéma de base de données
+- 🌐 Intégration API CoinGecko
+- 🐛 Debugging & Troubleshooting
+- 📐 Conventions de code
+- 🗺️ Roadmap et améliorations futures
+
+---
+
+## 🎯 Technologies Utilisées
+
+### Backend
+
+- **NestJS** 11.0.1 - Framework Node.js
+- **TypeScript** 5.7.3 - Langage
+- **Prisma** 6.19.0 - ORM
+- **Bull** 4.16.5 - Queue/Jobs
+- **Axios** 1.13.2 - HTTP Client
+
+### Base de Données
+
+- **PostgreSQL** 15 - Base de données relationnelle
+- **Redis** 7 - Cache & Queue backend
+
+### DevOps
+
+- **Docker** - Conteneurisation
+- **Docker Compose** - Orchestration
+
+---
+
+## 📈 État Actuel
+
+### ✅ Implémenté
+
+- ✅ Architecture monorepo NestJS
+- ✅ Service de collecte automatique
+- ✅ Intégration API CoinGecko avec rate limiting
+- ✅ Système de queues Bull + Redis
+- ✅ Dashboard Bull Board
+- ✅ Base de données PostgreSQL + Prisma
+- ✅ Modèles de données complets
+- ✅ Infrastructure Docker complète
+- ✅ Configuration centralisée
+- ✅ Logs structurés
+
+### 🚧 En Cours
+
+- ⚠️ API REST (endpoints CRUD à implémenter)
+- ⚠️ Tests unitaires et E2E
+- ⚠️ Documentation API (Swagger)
+
+---
+
+## 🗺️ Roadmap
+
+### Court Terme
+
+- [ ] Compléter l'API REST
+- [ ] Ajouter Swagger/OpenAPI
+- [ ] Tests (>80% coverage)
+- [ ] CI/CD Pipeline
+
+### Moyen Terme
+
+- [ ] Support de plus de cryptomonnaies
+- [ ] Données OHLCV
+- [ ] Système d'alertes (email, push)
+- [ ] Analytics & indicateurs techniques
+- [ ] WebSockets temps réel
+
+### Long Terme
+
+- [ ] Dashboard web (React/Vue)
+- [ ] Application mobile
+- [ ] Trading bot framework
+- [ ] Portfolio tracking
+- [ ] AI/ML pour prédictions
+
+---
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! N'hésitez pas à :
+
+1. Fork le projet
+2. Créer une branche (`git checkout -b feature/AmazingFeature`)
+3. Commit vos changements (`git commit -m 'Add some AmazingFeature'`)
+4. Push sur la branche (`git push origin feature/AmazingFeature`)
+5. Ouvrir une Pull Request
+
+---
+
+## 📞 Contact
+
+**Zakaria Reguieg**
+
+- Email: rzaki@hotmail.fr
+- GitHub: [@Zvki1](https://github.com/Zvki1)
+
+**Repository**: [crypto-collector-platform](https://github.com/Zvki1/crypto-collector-platform)
+
+---
+
+## 📄 License
+
+UNLICENSED - Projet privé
+
+---
+
+## 🙏 Remerciements
+
+- [NestJS](https://nestjs.com/) - Framework extraordinaire
+- [Prisma](https://www.prisma.io/) - ORM moderne et puissant
+- [CoinGecko](https://www.coingecko.com/) - API de données crypto
+- [Bull](https://github.com/OptimalBits/bull) - Système de queues robuste
+
+---
+
+**Dernière mise à jour**: 22 novembre 2025
