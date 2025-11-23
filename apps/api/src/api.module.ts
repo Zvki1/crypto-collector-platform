@@ -5,6 +5,7 @@ import { ApiService } from './api.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { DatabaseModule } from '@app/database';
+import { CryptosModule } from './cryptos/cryptos.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { DatabaseModule } from '@app/database';
     DatabaseModule,
     AuthModule,
     UsersModule,
+    CryptosModule,
   ],
   controllers: [ApiController],
   providers: [ApiService],
