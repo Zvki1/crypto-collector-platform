@@ -60,6 +60,8 @@ export class AuthService {
       sub: validUser.id,
       email: validUser.email,
       username: validUser.username,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      role: validUser.role,
     };
     const access_token = await this.jwtService.signAsync(payload);
     return {
