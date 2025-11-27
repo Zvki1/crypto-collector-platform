@@ -5,7 +5,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 export class MarketDataService {
   constructor(private prisma: PrismaService) {}
   async findByCryptoID(cryptoId: string, days: number = 7) {
-    // get the crypto market data
+    // get a crypto market data filtering by days
     const crypto = await this.prisma.cryptocurrency.findUnique({
       where: {
         id: cryptoId,
@@ -26,7 +26,7 @@ export class MarketDataService {
       orderBy: { timestamp: 'asc' },
     });
   }
-
+  // get the last market data checkpoint of a crypto
   async findLatest(cryptoId: string) {
     const crypto = await this.prisma.cryptocurrency.findUnique({
       where: {

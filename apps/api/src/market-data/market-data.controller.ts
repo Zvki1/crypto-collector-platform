@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { MarketDataService } from './market-data.service';
 import { FilterMarketDataDto } from './dto/filter-market-data.dto';
 
@@ -11,5 +11,9 @@ export class MarketDataController {
       query.cryptoId,
       query.days ? parseInt(query.days) : undefined,
     );
+  }
+  @Get(':cryptoId')
+  async getLatestHistory(@Param('cryptoId', ParseUUIDPipe) cryptoId: string) {
+    return this.marketDataService.findLatest(cryptoId);
   }
 }
