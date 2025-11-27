@@ -10,7 +10,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCryptoDto } from './dto/create-crypto.dto';
-import { firstValueFrom } from 'rxjs';
+// import { firstValueFrom } from 'rxjs';
 @Injectable()
 export class CryptosService {
   constructor(
@@ -59,10 +59,13 @@ export class CryptosService {
     }
     try {
       // 1. Fetch CoinGecko (peut échouer si crypto inexistante)
-      const response = await firstValueFrom(
-        this.httpService.get(
-          `https://api.coingecko.com/api/v3/coins/${createCryptoDto.coingeckoId}`,
-        ),
+      // const response = await firstValueFrom(
+      //   this.httpService.get(
+      //     `https://api.coingecko.com/api/v3/coins/${createCryptoDto.coingeckoId}`,
+      //   ),
+      // );
+      const response = await this.httpService.axiosRef.get(
+        `https://api.coingecko.com/api/v3/coins/${createCryptoDto.coingeckoId}`,
       );
 
       const coinData = response.data;

@@ -4,7 +4,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CryptosService } from './cryptos.service';
 import { PrismaService } from '@app/database';
 import { HttpService } from '@nestjs/axios';
-import { NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 
 describe('CryptosService', () => {
   let service: CryptosService;
@@ -205,18 +209,95 @@ describe('CryptosService', () => {
   describe('create', () => {
     it('devrait créer une nouvelle crypto', async () => {
       // Arrange
+      const createCryptoDto = {
+        coingeckoId: 'bitcoin',
+      };
+      const mockCoinGeckoResponse = {
+        id: 'bitcoin',
+        symbol: 'btc',
+        name: 'Bitcoin',
+        image: {
+          large:
+            'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+        },
+        market_cap_rank: 1,
+      };
+      const mockCreatedCrypto = {
+        id: '123',
+        coingeckoId: 'bitcoin',
+        symbol: 'BTC',
+        name: 'Bitcoin',
+        image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+        marketCapRank: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      // mocking methods
+      jest.spyOn(prisma.cryptocurrency, 'findUnique').mockResolvedValue(null);
+      jest
+        .spyOn(httpService.axiosRef, 'get')
+        .mockResolvedValue({ data: mockCoinGeckoResponse });
+      jest
+        .spyOn(prisma.cryptocurrency, 'create')
+        .mockResolvedValue(mockCreatedCrypto);
       // Act
+      // const cryptoExists = prisma.cryptocurrency.findUnique(
+      //   createCryptoDto.coingeckoId,
+      // );
+      const result = await service.create(createCryptoDto);
       // Assert
+      expect(result).toEqual(mockCreatedCrypto);
+      expect(prisma.cryptocurrency.findUnique).toHaveBeenCalledWith({
+        where: { coingeckoId: createCryptoDto.coingeckoId },
+      });
     });
 
     it('devrait lancer ConflictException si crypto existe déjà', async () => {
       // Arrange
+      const createCryptoDto = {
+        coingeckoId: 'bitcoin',
+      };
+      const mockExistingCrypto = {
+        id: '123',
+        coingeckoId: 'bitcoin',
+        symbol: 'BTC',
+        name: 'Bitcoin',
+        image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
+        marketCapRank: 1,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      jest
+        .spyOn(prisma.cryptocurrency, 'findUnique')
+        .mockResolvedValue(mockExistingCrypto);
       // Act & Assert
+      await expect(service.create(createCryptoDto)).rejects.toThrow(
+        ConflictException,
+      );
+      expect(prisma.cryptocurrency.findUnique).toHaveBeenCalledWith({
+        where: { coingeckoId: createCryptoDto.coingeckoId },
+      });
     });
 
     it('devrait lancer BadRequestException si données CoinGecko invalides', async () => {
       // Arrange
+      const createCryptoDto = {
+        coingeckoId: 'bitcoin',
+      };
+      jest.spyOn(prisma.cryptocurrency, 'findUnique').mockResolvedValue(null);
+      const axiosError = {
+        response: { status: 404 },
+        message: 'Request failed with status code 404',
+      };
+
+      jest.spyOn(httpService.axiosRef, 'get').mockRejectedValue(axiosError);
       // Act & Assert
+      await expect(service.create(createCryptoDto)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });
