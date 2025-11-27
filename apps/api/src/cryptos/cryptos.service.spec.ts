@@ -193,7 +193,9 @@ describe('CryptosService', () => {
 
     it('devrait lancer NotFoundException si crypto inexistante', async () => {
       // arrange
-      const prismaError = new Error('Record to delete does not exist.');
+      const prismaError = new Error(
+        'Record to delete does not exist.',
+      ) as Error & { code: string };
       prismaError.code = 'P2025';
 
       jest
