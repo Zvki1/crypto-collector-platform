@@ -1,3 +1,5 @@
+// apps/collector/src/jobs/market-data-collector.job.ts
+
 import {
   Processor,
   Process,
@@ -6,9 +8,8 @@ import {
   OnQueueFailed,
 } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import type { Job } from 'bull';
-import { CoingeckoClientService } from '../services/coingecko-client.service';
+import { CoingeckoClientService } chandeliersfrom '../services/coingecko-client.service';
 import { DataTransformerService } from '../services/data-transformer.service';
 import { StorageService } from '../services/storage.service';
 
@@ -20,27 +21,26 @@ export class MarketDataCollectorJob {
     private coingeckoClient: CoingeckoClientService,
     private dataTransformer: DataTransformerService,
     private storage: StorageService,
-    private configService: ConfigService,
+    // ❌ RETIRE ConfigService du constructor
   ) {}
 
   @Process('collect')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async collectMarketData(job: Job) {
-    const cryptoIds = this.configService.get<string[]>('collector.cryptoIds');
-
-    if (!cryptoIds || cryptoIds.length === 0) {
-      this.logger.error('No crypto IDs configured for collection');
-      throw new Error('No crypto IDs configured for collection');
-    }
-
-    this.logger.log(`Starting collection for: ${cryptoIds.join(', ')}`);
-
     try {
-      // 1. Fetch data from CoinGecko
+      const cryptosToTrack = await this.storage.getAllCryptocurrencies();
+
+      if (!cryptosToTrack || cryptosToTrack.length === 0) {
+        this.logger.warn('⚠️ No cryptocurrencies to track in database');
+        return { success: true, processed: 0 };
+      }
+
+      const cryptoIds = cryptosToTrack.map((crypto) => crypto.coingeckoId);
+
+      this.logger.log(`📊 Starting collection for: ${cryptoIds.join(', ')}`);
+
       const marketDataList =
         await this.coingeckoClient.fetchMarketData(cryptoIds);
 
-      // 2. Process each cryptocurrency
       for (const apiData of marketDataList) {
         try {
           // 2.1 Upsert cryptocurrency
@@ -65,7 +65,6 @@ export class MarketDataCollectorJob {
           this.logger.error(
             `Failed to process ${apiData.symbol}: ${errorMessage}`,
           );
-          // Continue avec les autres cryptos même si une échoue
         }
       }
 
@@ -79,6 +78,7 @@ export class MarketDataCollectorJob {
     }
   }
 
+  // Les autres méthodes restent identiques
   @OnQueueActive()
   onActive(job: Job) {
     this.logger.log(`Processing job ${job.id} of type ${job.name}`);

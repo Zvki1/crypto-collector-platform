@@ -18,7 +18,7 @@
         │    :3001       │              │    :3000     │
         │                │              │              │
         │ • Scheduler    │              │ • REST       │
-        │ • Bull Queue   │              │ • GraphQL    │
+        │ • Bull Queue   │              │              │
         │ • CoinGecko    │              │ • Swagger    │
         └────────┬───────┘              └──────┬───────┘
                  │                              │
@@ -37,8 +37,8 @@
      │   PostgreSQL    │       │      Redis       │
      │     :5432       │       │      :6379       │
      │                 │       │                  │
-     │ • Cryptocurrencies     │ • Bull Queues    │
-     │ • MarketData    │       │ • Cache          │
+     │                 │       │ • Bull Queues    │
+     │ • Schema        │       │ • Cache          │
      └─────────────────┘       └──────────────────┘
 ```
 
@@ -74,7 +74,7 @@
         │           ▼
         │    ┌──────────────────┐
         │    │ CoinGecko API    │  GET /coins/markets
-        │    │                  │  params: { ids: 'bitcoin,ethereum,solana' }
+        │    │                  │  params: { ids: 'bitcoin,ethereum,solana'}
         │    └────────┬─────────┘
         │             │ Response: JSON[]
         │             ▼

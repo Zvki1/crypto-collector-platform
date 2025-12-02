@@ -15,7 +15,7 @@ export class JwtAuthGuard implements CanActivate {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    console.log(token);
+    // console.log(token);
     if (!token) {
       throw new UnauthorizedException('Token manquant');
     }

@@ -22,7 +22,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   getMe(@Request() req) {
-    console.log('User from JWT:', req.user);
+    // console.log('User from JWT:', req.user);
     // req.user = { sub: "uuid", email: "...", username: "..." }
 
     return this.usersService.findById(req.user.sub);

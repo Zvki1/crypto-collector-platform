@@ -7,6 +7,17 @@ export class StorageService {
   private readonly logger = new Logger(StorageService.name);
 
   constructor(private prisma: PrismaService) {}
+  // fetch tous les crypto disponible dans la BDD
+  async getAllCryptocurrencies() {
+    return this.prisma.cryptocurrency.findMany({
+      select: {
+        id: true,
+        coingeckoId: true,
+        symbol: true,
+        name: true,
+      },
+    });
+  }
 
   /**
    * Crée ou met à jour une cryptomonnaie
