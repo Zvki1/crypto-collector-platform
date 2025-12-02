@@ -26,6 +26,8 @@ export class MarketDataService {
       orderBy: { timestamp: 'asc' },
     });
   }
+  // --------------
+  // --------------
   // get the last market data checkpoint of a crypto
   async findLatest(cryptoId: string) {
     const crypto = await this.prisma.cryptocurrency.findUnique({
