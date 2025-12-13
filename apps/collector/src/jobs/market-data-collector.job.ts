@@ -9,7 +9,7 @@ import {
 } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import type { Job } from 'bull';
-import { CoingeckoClientService } chandeliersfrom '../services/coingecko-client.service';
+import { CoingeckoClientService } from '../services/coingecko-client.service';
 import { DataTransformerService } from '../services/data-transformer.service';
 import { StorageService } from '../services/storage.service';
 
@@ -21,7 +21,6 @@ export class MarketDataCollectorJob {
     private coingeckoClient: CoingeckoClientService,
     private dataTransformer: DataTransformerService,
     private storage: StorageService,
-    // ❌ RETIRE ConfigService du constructor
   ) {}
 
   @Process('collect')
@@ -78,7 +77,6 @@ export class MarketDataCollectorJob {
     }
   }
 
-  // Les autres méthodes restent identiques
   @OnQueueActive()
   onActive(job: Job) {
     this.logger.log(`Processing job ${job.id} of type ${job.name}`);

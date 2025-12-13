@@ -1,0 +1,31 @@
+Title,Description,List,Labels,Backlog
+Setup projet NestJS (monorepo avec 2 apps),"Architecture monorepo prête (apps: collector, api; libs: common, database)",Sprint 1,Done,No
+Configuration Docker/Docker Compose,"PostgreSQL, Redis, PgAdmin via docker-compose",Sprint 1,Done,No
+Connexion API (CoinGecko) basique,"Client HTTP avec rate limiting et timeouts",Sprint 1,Done,No
+Modèle de données (Prisma),"Schéma + migrations pour cryptocurrencies & market_data",Sprint 1,Done,No
+Insertion en base de données,"Upsert crypto + insert market_data via Prisma",Sprint 1,Done,No
+Tests unitaires du collecteur,"Tests des services collector/transformer/storage",Sprint 1,ToDo,No
+
+Implémentation Bull Queue pour scheduler,"Queue 'market-data-collection' + planification",Sprint 2,Done,Yes
+Gestion des erreurs et retry,"Retry/backoff exponentiel + logs",Sprint 2,Done,Yes
+API REST (CRUD cryptos),"Endpoints liste/détail/market-data avec pagination",Sprint 2,InProgress,Yes
+Authentication JWT basique,"Auth module + guards pour endpoints protégés",Sprint 2,ToDo,Yes
+Tests d'intégration,"Tests API avec environnement Prisma de test",Sprint 2,ToDo,Yes
+Documentation Swagger,"Configurer SwaggerModule et exposer /api-docs",Sprint 2,InProgress,Yes
+
+Application React avec authentification,"App React + login basique",Sprint 3,ToDo,Yes
+Dashboard avec graphiques basiques,"Visualisation des prix/volumes",Sprint 3,ToDo,Yes
+Filtres temporels,"Sélecteurs d'intervalles (1h/24h/7j)",Sprint 3,ToDo,Yes
+Liste des cryptomonnaies,"Table avec recherche/tri",Sprint 3,ToDo,Yes
+Tests frontend (RTL),"React Testing Library sur composants clés",Sprint 3,ToDo,Yes
+
+Alertes personnalisées,"Seuils de prix et variations %",Sprint 4,ToDo,Yes
+Notifications email (NodeMailer),"Envoi email sur déclenchement d'alertes",Sprint 4,ToDo,Yes
+Module prévision (moyennes mobiles),"Calcul MA/EMA simple",Sprint 4,ToDo,Yes
+Portefeuille virtuel basique,"Suivi de positions factices",Sprint 4,ToDo,Yes
+
+Pipeline GitHub Actions complet,"Lint + build + tests (+ déploiement optionnel)",Sprint 5,ToDo,Yes
+Tests automatisés (unitaires + e2e),"Couverture unitaire + scénarios e2e",Sprint 5,ToDo,Yes
+SonarQube / analyse qualité,"Analyse statique et dette technique",Sprint 5,ToDo,Yes
+Prometheus + Grafana basique,"Métriques et dashboards",Sprint 5,ToDo,Yes
+Documentation finale,"Mise à jour docs et READMEs",Sprint 5,ToDo,Yes
