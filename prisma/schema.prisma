@@ -38,6 +38,8 @@ model Cryptocurrency {
 
   // Relations
   marketData MarketData[]
+  transactions Transaction[]
+
 
   @@index([symbol])
   @@index([marketCapRank])
@@ -109,12 +111,65 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  portfolio Portfolio?
+
+
   @@index([email])
   @@map("users")
 }
-
 enum UserRole {
   USER        
   ADMIN       
   SUPERADMIN  
 }
+
+
+model Portfolio {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid 
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@map("portfolios")
+}
+// ============================================
+// Transaction Model
+// ============================================
+model Transaction {
+  id               String          @id @default(uuid()) @db.Uuid
+  portfolioId      String          @map("portfolio_id") @db.Uuid
+  cryptocurrencyId String          @map("cryptocurrency_id") @db.Uuid
+  type             TransactionType
+  amount           Decimal         @db.Decimal(20, 8)  
+  price            Decimal         @db.Decimal(20, 8) 
+  totalValue       Decimal         @map("total_value") @db.Decimal(20, 2) 
+  fees             Decimal?        @db.Decimal(20, 2)
+  notes            String?         @db.Text
+  transactionDate  DateTime        @map("transaction_date") @default(now())
+  createdAt        DateTime        @default(now()) @map("created_at")
+
+  // Relations
+  portfolio      Portfolio      @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  cryptocurrency Cryptocurrency @relation(fields: [cryptocurrencyId], references: [id], onDelete: Restrict)
+
+  @@index([portfolioId])
+  @@index([cryptocurrencyId])
+  @@index([transactionDate])
+  @@map("transactions")
+}
+
+// ============================================
+// TransactionType Enum (NOUVEAU)
+// ============================================
+enum TransactionType {
+  BUY  
+  SELL 
+}
+
+
+
+
