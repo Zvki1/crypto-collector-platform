@@ -10,13 +10,19 @@ export class MarketDataService {
       where: {
         id: cryptoId,
       },
+      select: {
+        id: true,
+        name: true,
+        symbol: true,
+        image: true,
+      },
     });
     if (!crypto) {
       throw new NotFoundException(`Crypto avec l'id ${cryptoId} non trouvée`);
     }
     const fromDate = new Date();
     fromDate.setDate(fromDate.getDate() - days);
-    return this.prisma.marketData.findMany({
+    const marketData = await this.prisma.marketData.findMany({
       where: {
         cryptocurrencyId: cryptoId,
         timestamp: {
@@ -25,6 +31,7 @@ export class MarketDataService {
       },
       orderBy: { timestamp: 'asc' },
     });
+    return { marketData, crypto };
   }
   // --------------
   // --------------
@@ -42,6 +49,15 @@ export class MarketDataService {
       where: { cryptocurrencyId: cryptoId },
       orderBy: {
         timestamp: 'desc',
+      },
+      include: {
+        cryptocurrency: {
+          select: {
+            symbol: true,
+            name: true,
+            image: true,
+          },
+        },
       },
     });
     if (!marketData) {
