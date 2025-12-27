@@ -46,7 +46,26 @@ export class CryptosService {
       throw new NotFoundException('Crypto non trouvee');
     }
   }
-
+  async findOverview() {
+    const cryptos = await this.prisma.cryptocurrency.findMany({
+      where: { isActive: true },
+      include: {
+        marketData: {
+          orderBy: { timestamp: 'desc' },
+          take: 1,
+        },
+      },
+    });
+    const totalVolume24h = cryptos.reduce((acc, crypto) => {
+      const md = crypto.marketData[0];
+      return acc + (md && md.totalVolume ? Number(md.totalVolume) : 0);
+    }, 0);
+    const totalMarketCap = cryptos.reduce((acc, crypto) => {
+      const md = crypto.marketData[0];
+      return acc + (md && md.marketCap ? Number(md.marketCap) : 0);
+    }, 0);
+    return { activeCryptos: cryptos.length, totalVolume24h, totalMarketCap };
+  }
   //   add crypto for admin only
   async create(createCryptoDto: CreateCryptoDto) {
     const cryptoExists = await this.prisma.cryptocurrency.findUnique({

@@ -23,7 +23,10 @@ export class CryptosController {
   async findAll() {
     return this.cryptosService.findAll();
   }
-
+  @Get('overview')
+  findOverview() {
+    return this.cryptosService.findOverview();
+  }
   @Get(':id')
   async findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.cryptosService.findOne(id);
