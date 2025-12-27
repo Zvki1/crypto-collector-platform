@@ -7,6 +7,7 @@ import { UsersModule } from './users/users.module';
 import { DatabaseModule } from '@app/database';
 import { CryptosModule } from './cryptos/cryptos.module';
 import { MarketDataModule } from './market-data/market-data.module';
+import { PortfolioModule } from './portfolio/portfolio.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { MarketDataModule } from './market-data/market-data.module';
     UsersModule,
     CryptosModule,
     MarketDataModule,
+    PortfolioModule,
   ],
   controllers: [ApiController],
   providers: [ApiService],

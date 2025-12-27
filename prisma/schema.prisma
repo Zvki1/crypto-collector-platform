@@ -146,9 +146,7 @@ model Transaction {
   type             TransactionType
   amount           Decimal         @db.Decimal(20, 8)  
   price            Decimal         @db.Decimal(20, 8) 
-  totalValue       Decimal         @map("total_value") @db.Decimal(20, 2) 
-  fees             Decimal?        @db.Decimal(20, 2)
-  notes            String?         @db.Text
+  totalValue       Decimal         @map("total_value") @db.Decimal(20, 2)  // amount * price
   transactionDate  DateTime        @map("transaction_date") @default(now())
   createdAt        DateTime        @default(now()) @map("created_at")
 
