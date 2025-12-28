@@ -9,7 +9,7 @@ export class CreateTransactionDto {
   @IsNumber()
   @Min(0.0001)
   amount: number;
-  @IsNumber()
-  @Min(0.0001)
-  price: number;
+  // @IsNumber()
+  // @Min(0.0001)
+  // price: number;
 }

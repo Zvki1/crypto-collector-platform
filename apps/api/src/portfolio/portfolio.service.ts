@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateTransactionDto } from './dto/CreateTransaction.dto';
 import { PrismaService } from '@app/database';
 
@@ -20,21 +24,44 @@ export class PortfolioService {
     }
     return portfolio?.transactions;
   }
+
+  // // // // // // // // // //
+  // create transaction
+  // // // // // // // // // //
+
   async createTransaction(
     createTransactionDto: CreateTransactionDto,
     userId: string,
   ) {
-    const crypto = await this.prisma.cryptocurrency.findUnique({
-      where: { id: createTransactionDto.cryptocurrencyId },
+    const latestPrice = await this.prisma.marketData.findFirst({
+      where: { cryptocurrencyId: createTransactionDto.cryptocurrencyId },
+      orderBy: { timestamp: 'desc' },
+      select: { currentPrice: true },
     });
-    if (!crypto) {
-      throw new NotFoundException('crypto introuvable');
+    if (!latestPrice) {
+      throw new NotFoundException('latestPrice de la crypto est introuvable');
     }
+    console.log(latestPrice, 'latest');
     const portfolio = await this.prisma.portfolio.findUnique({
       where: { userId },
     });
     if (!portfolio) {
       throw new NotFoundException('portfolio introuvable');
+    }
+    const cryptoTotals = await this.getCryptoTotalsInPortfolio(
+      portfolio.id,
+      createTransactionDto.cryptocurrencyId,
+    );
+    console.log(cryptoTotals);
+    if (
+      createTransactionDto.type == 'SELL' &&
+      cryptoTotals.totalBought - cryptoTotals.totalSold <
+        createTransactionDto.amount
+    ) {
+      throw new BadRequestException(
+        `Vous ne pouvez pas vendre plus que ce que vous possédez. ` +
+          `Quantité actuelle ${cryptoTotals.totalBought - cryptoTotals.totalSold}`,
+      );
     }
     const transaction = await this.prisma.transaction.create({
       data: {
@@ -42,10 +69,33 @@ export class PortfolioService {
         type: createTransactionDto.type,
         amount: createTransactionDto.amount,
         cryptocurrencyId: createTransactionDto.cryptocurrencyId,
-        price: createTransactionDto.price,
-        totalValue: createTransactionDto.amount * createTransactionDto.price,
+        price: latestPrice.currentPrice,
+        totalValue:
+          createTransactionDto.amount * Number(latestPrice.currentPrice),
       },
     });
     return transaction;
+  }
+
+  // // // // // // // // // //
+  // get crypto sales summary
+  // // // // // // // // // //
+
+  private async getCryptoTotalsInPortfolio(
+    portfolioId: string,
+    cryptocurrencyId: string,
+  ) {
+    const buyAgg = await this.prisma.transaction.aggregate({
+      where: { portfolioId, cryptocurrencyId, type: 'BUY' },
+      _sum: { amount: true },
+    });
+    const sellAgg = await this.prisma.transaction.aggregate({
+      where: { portfolioId, cryptocurrencyId, type: 'SELL' },
+      _sum: { amount: true },
+    });
+    return {
+      totalBought: Number(buyAgg._sum.amount) || 0,
+      totalSold: Number(sellAgg._sum.amount) || 0,
+    };
   }
 }
