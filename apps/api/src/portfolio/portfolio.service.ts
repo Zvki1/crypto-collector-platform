@@ -125,7 +125,6 @@ export class PortfolioService {
       const currentPrice = latestMarketData.find(
         (currentPrice) => currentPrice.cryptocurrencyId === info?.id,
       );
-      console.log(currentPrice);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { crypto, cryptocurrencyId, ...rest } = {
         ...info,
@@ -136,6 +135,31 @@ export class PortfolioService {
     });
 
     return finalResult;
+  }
+
+  // // // // // // // // // //
+  // getPortfolioOverview
+  // // // // // // // // // //
+  async getPortfolioOverview(userId: string) {
+    const walletHoldings = await this.getWalletHoldings(userId);
+    const portfolioId = await this.getPortfolioId(userId);
+
+    const totalValue = walletHoldings.reduce((acc, walletHolding) => {
+      return acc + walletHolding.quantity * Number(walletHolding.currentPrice);
+    }, 0);
+    const boughtTransactions = await this.prisma.transaction.findMany({
+      where: { AND: [{ portfolioId }, { type: { equals: 'BUY' } }] },
+    });
+    const totalInvested = boughtTransactions.reduce(
+      (acc, boughtTransaction) => {
+        return acc + Number(boughtTransaction.totalValue);
+      },
+      0,
+    );
+    const pl = totalValue - totalInvested;
+    // return pl;
+    const roi = (pl / totalInvested) * 100;
+    return { totalValue, totalInvested, pl, roi };
   }
   // // // // // // // // // //
   // getCryptoTotalsInPortfolio
@@ -157,5 +181,17 @@ export class PortfolioService {
       totalBought: Number(buyAgg._sum.amount) || 0,
       totalSold: Number(sellAgg._sum.amount) || 0,
     };
+  }
+  // // // // // // // // // //
+  // getPortfolioId
+  // // // // // // // // // //
+  private async getPortfolioId(userId: string) {
+    const portfolio = await this.prisma.portfolio.findUnique({
+      where: { userId },
+    });
+    if (!portfolio) {
+      throw new NotFoundException('portfolio introuvable');
+    }
+    return portfolio.id;
   }
 }
