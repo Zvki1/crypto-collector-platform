@@ -78,7 +78,67 @@ export class PortfolioService {
   }
 
   // // // // // // // // // //
-  // get crypto sales summary
+  // get wallet Holdings
+  // // // // // // // // // //
+  async getWalletHoldings(userId: string) {
+    const portfolio = await this.prisma.portfolio.findUnique({
+      where: { userId },
+    });
+
+    const transactions = await this.prisma.transaction.groupBy({
+      by: ['cryptocurrencyId'],
+      where: { portfolioId: portfolio?.id },
+    });
+    // les ids des cryptos en transactions
+    const cryptoIds = transactions.map((t) => t.cryptocurrencyId);
+    // recuperations des informations des c cryptos
+    const cryptoInfos = await this.prisma.cryptocurrency.findMany({
+      where: { id: { in: cryptoIds } },
+      select: { name: true, image: true, symbol: true, id: true },
+    });
+    // console.log(cryptoInfos);
+    const latestMarketData = await this.prisma.marketData.findMany({
+      where: { cryptocurrencyId: { in: cryptoIds } },
+      orderBy: { timestamp: 'desc' },
+      distinct: ['cryptocurrencyId'],
+      select: {
+        cryptocurrencyId: true,
+        currentPrice: true,
+      },
+    });
+    // console.log(latestMarketData);
+    const results = await Promise.all(
+      transactions.map(async (crypto) => {
+        const totals = await this.getCryptoTotalsInPortfolio(
+          portfolio?.id as string,
+          crypto.cryptocurrencyId,
+        );
+
+        return {
+          quantity: totals.totalBought - totals.totalSold,
+          crypto: crypto.cryptocurrencyId,
+        };
+      }),
+    );
+    const finalResult = results.map((r) => {
+      const info = cryptoInfos.find((info) => info.id === r.crypto);
+      const currentPrice = latestMarketData.find(
+        (currentPrice) => currentPrice.cryptocurrencyId === info?.id,
+      );
+      console.log(currentPrice);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { crypto, cryptocurrencyId, ...rest } = {
+        ...info,
+        ...r,
+        ...currentPrice,
+      };
+      return rest;
+    });
+
+    return finalResult;
+  }
+  // // // // // // // // // //
+  // getCryptoTotalsInPortfolio
   // // // // // // // // // //
 
   private async getCryptoTotalsInPortfolio(

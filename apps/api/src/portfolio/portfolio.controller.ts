@@ -22,6 +22,12 @@ export class PortfolioController {
     const userId = req?.user.sub;
     return await this.portfolioService.getTransactions(userId as string);
   }
+  @Get('holdings')
+  async findHoldings(@Request() req) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const userId = req?.user.sub;
+    return await this.portfolioService.getWalletHoldings(userId);
+  }
   @Post('transaction')
   async createTransaction(
     @Request() req,
