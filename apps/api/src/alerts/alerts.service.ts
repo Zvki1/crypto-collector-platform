@@ -3,9 +3,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { PrismaService } from '@app/database';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateAlertDto } from './dto/createAlert.dto';
 import { AlertStatus, AlertType } from '@prisma/client';
+import { error } from 'console';
 
 @Injectable()
 export class AlertsService {
@@ -34,5 +39,29 @@ export class AlertsService {
       },
     });
     return alert;
+  }
+  async getAlerts(userId: string) {
+    const alerts = await this.prisma.alert.findMany({
+      where: { userId },
+      include: { cryptocurrency: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    if (!alerts) {
+      throw new NotFoundException('alerts introuvable');
+    }
+    return alerts;
+  }
+  async deleteAlert(id: string, userId: string) {
+    try {
+      const deletedAlert = await this.prisma.alert.delete({
+        where: { id, userId },
+      });
+      return deletedAlert;
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException('Alerte introuvable');
+      }
+      throw error;
+    }
   }
 }
