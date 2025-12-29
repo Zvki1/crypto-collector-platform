@@ -1,0 +1,38 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { PrismaService } from '@app/database';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { CreateAlertDto } from './dto/createAlert.dto';
+import { AlertStatus, AlertType } from '@prisma/client';
+
+@Injectable()
+export class AlertsService {
+  constructor(private readonly prisma: PrismaService) {}
+  async CreateAlert(userId: string, createAlertDto: CreateAlertDto) {
+    const activeAlertsCount = await this.prisma.alert.count({
+      where: {
+        userId,
+        status: AlertStatus.ACTIVE,
+      },
+    });
+    if (activeAlertsCount >= 10) {
+      throw new BadRequestException(
+        'Limite de 10 alertes actives atteinte. Supprimez ou désactivez une alerte existante.',
+      );
+    }
+    const alert = await this.prisma.alert.create({
+      data: {
+        userId,
+        cryptocurrencyId: createAlertDto.cryptocurrencyId,
+        type: createAlertDto.type,
+        targetPrice: createAlertDto.targetPrice,
+      },
+      include: {
+        cryptocurrency: true,
+      },
+    });
+    return alert;
+  }
+}

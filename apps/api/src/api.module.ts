@@ -8,6 +8,7 @@ import { DatabaseModule } from '@app/database';
 import { CryptosModule } from './cryptos/cryptos.module';
 import { MarketDataModule } from './market-data/market-data.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
+import { AlertsModule } from './alerts/alerts.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PortfolioModule } from './portfolio/portfolio.module';
     CryptosModule,
     MarketDataModule,
     PortfolioModule,
+    AlertsModule,
   ],
   controllers: [ApiController],
   providers: [ApiService],
