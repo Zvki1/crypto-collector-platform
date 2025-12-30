@@ -1,5 +1,3 @@
-// apps/collector/src/jobs/market-data-collector.job.ts
-
 import {
   Processor,
   Process,
@@ -12,6 +10,7 @@ import type { Job } from 'bull';
 import { CoingeckoClientService } from '../services/coingecko-client.service';
 import { DataTransformerService } from '../services/data-transformer.service';
 import { StorageService } from '../services/storage.service';
+import { MarketDataEventService } from '../services/market-data-event.service';
 
 @Processor('market-data-collection')
 export class MarketDataCollectorJob {
@@ -21,6 +20,7 @@ export class MarketDataCollectorJob {
     private coingeckoClient: CoingeckoClientService,
     private dataTransformer: DataTransformerService,
     private storage: StorageService,
+    private marketDataEvent: MarketDataEventService,
   ) {}
 
   @Process('collect')
@@ -54,9 +54,12 @@ export class MarketDataCollectorJob {
             cryptocurrency.id,
           );
           await this.storage.saveMarketData(marketDataEntity);
-
+          await this.marketDataEvent.emitMarketDataCollected(
+            cryptocurrency.id,
+            apiData.current_price,
+          );
           this.logger.log(
-            `✅ Processed ${apiData.symbol.toUpperCase()} successfully`,
+            `✅ Processed ${apiData.symbol.toUpperCase()} successfully + event emitted`,
           );
         } catch (error) {
           const errorMessage =

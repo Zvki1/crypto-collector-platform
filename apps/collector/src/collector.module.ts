@@ -10,6 +10,8 @@ import { StorageService } from './services/storage.service';
 import { MarketDataCollectorJob } from './jobs/market-data-collector.job';
 import { CollectorScheduler } from './collector.scheduler';
 import { HealthController } from './health/health.controller';
+import { MarketDataEventService } from './services/market-data-event.service';
+import { TestController } from './test/test.controller';
 
 @Module({
   imports: [
@@ -32,15 +34,19 @@ import { HealthController } from './health/health.controller';
     BullModule.registerQueue({
       name: 'market-data-collection',
     }),
+    BullModule.registerQueue({
+      name: 'market-data-events',
+    }),
     ScheduleModule.forRoot(),
   ],
-  controllers: [HealthController],
+  controllers: [HealthController, TestController],
   providers: [
     CoingeckoClientService,
     DataTransformerService,
     StorageService,
     MarketDataCollectorJob,
     CollectorScheduler,
+    MarketDataEventService,
   ],
 })
 export class CollectorModule {}

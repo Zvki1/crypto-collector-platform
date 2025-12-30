@@ -9,6 +9,7 @@ import { CryptosModule } from './cryptos/cryptos.module';
 import { MarketDataModule } from './market-data/market-data.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
 import { AlertsModule } from './alerts/alerts.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AlertsModule } from './alerts/alerts.module';
     MarketDataModule,
     PortfolioModule,
     AlertsModule,
+    NotificationsModule,
   ],
   controllers: [ApiController],
   providers: [ApiService],
