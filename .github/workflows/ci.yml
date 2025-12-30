@@ -21,11 +21,14 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-    #   - name: Lint
-    #     run: npm run lint
+      #   - name: Lint
+      #     run: npm run lint
 
-      - name: Build
-        run: npm run build
+      - name: Build API
+        run: npm run build -- api
+
+      - name: Build Collector
+        run: npm run build -- collector
 
       - name: Run tests
         run: npm test
