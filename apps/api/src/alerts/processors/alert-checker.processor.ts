@@ -90,7 +90,10 @@ export class AlertCheckerProcessor {
     };
   }
 
-  private evaluateCondition(alert: any, currentPrice: number): boolean {
+  private evaluateCondition(
+    alert: { targetPrice: { toNumber: () => number }; type: AlertType },
+    currentPrice: number,
+  ): boolean {
     const target = alert.targetPrice.toNumber();
     this.logger.debug(
       `Evaluating: ${currentPrice} >= ${target} ? (type: ${alert.type})`,

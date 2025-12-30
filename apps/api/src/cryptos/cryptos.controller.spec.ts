@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CryptoController } from './cryptos.controller';
+import { CryptosController } from './cryptos.controller';
 
 describe('CryptoController', () => {
-  let controller: CryptoController;
+  let controller: CryptosController;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [CryptoController],
+      controllers: [CryptosController],
     }).compile();
 
-    controller = module.get<CryptoController>(CryptoController);
+    controller = module.get<CryptosController>(CryptosController);
   });
 
   it('should be defined', () => {

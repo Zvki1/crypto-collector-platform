@@ -1,3 +1,7 @@
+interface JwtPayload {
+  sub: string;
+  email: string;
+}
 import {
   CanActivate,
   ExecutionContext,
@@ -12,20 +16,15 @@ export class JwtAuthGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
     const token = this.extractTokenFromHeader(request);
-    // console.log(token);
     if (!token) {
       throw new UnauthorizedException('Token manquant');
     }
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      const payload = await this.jwtService.verifyAsync(token);
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-      request['user'] = payload;
+      const payload = await this.jwtService.verifyAsync<JwtPayload>(token);
+      (request as Request & { user?: JwtPayload }).user = payload;
     } catch (error) {
       console.error('Erreur JWT:', error);
       throw new UnauthorizedException('Token invalide ou expiré');

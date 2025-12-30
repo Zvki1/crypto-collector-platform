@@ -1,21 +1,21 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import nodemailer, { Transporter } from 'nodemailer';
 import { AlertType } from '@prisma/client';
 
 @Injectable()
 export class EmailService {
   private readonly logger = new Logger(EmailService.name);
-  private transporter;
+  private transporter: Transporter;
 
   constructor(private configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      host: this.configService.get('SMTP_HOST'),
-      port: this.configService.get('SMTP_PORT'),
+      host: this.configService.get<string>('SMTP_HOST'),
+      port: Number(this.configService.get('SMTP_PORT')),
       secure: true,
       auth: {
-        user: this.configService.get('SMTP_USER'),
-        pass: this.configService.get('SMTP_PASSWORD'),
+        user: this.configService.get<string>('SMTP_USER'),
+        pass: this.configService.get<string>('SMTP_PASSWORD'),
       },
     });
   }
@@ -100,8 +100,9 @@ export class EmailService {
       });
 
       this.logger.log(`✅ Email sent to ${userEmail}`);
-    } catch (error) {
-      this.logger.error(`❌ Failed to send email to ${userEmail}:`, error);
+    } catch (error: unknown) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      this.logger.error(`❌ Failed to send email to ${userEmail}: ${errorMsg}`);
       throw error;
     }
   }

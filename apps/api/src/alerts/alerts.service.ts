@@ -1,7 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+
 import { PrismaService } from '@app/database';
 import {
   BadRequestException,
@@ -9,8 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateAlertDto } from './dto/createAlert.dto';
-import { AlertStatus, AlertType } from '@prisma/client';
-import { error } from 'console';
+import { AlertStatus } from '@prisma/client';
 
 @Injectable()
 export class AlertsService {

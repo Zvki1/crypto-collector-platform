@@ -24,7 +24,7 @@ export class MarketDataCollectorJob {
   ) {}
 
   @Process('collect')
-  async collectMarketData(job: Job) {
+  async collectMarketData() {
     try {
       const cryptosToTrack = await this.storage.getAllCryptocurrencies();
 
