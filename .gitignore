@@ -41,7 +41,8 @@ lerna-debug.log*
 .env.test.local
 .env.production.local
 .env.local
-
+.env.test
+.env.production
 # temp directory
 .temp
 .tmp
@@ -58,3 +59,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /generated/prisma
 
 constants.ts
+
+docs

@@ -120,20 +120,37 @@ describe('MarketDataService', () => {
           timestamp: new Date('2025-11-27'),
         },
       ];
-      jest
-        .spyOn(prisma.cryptocurrency, 'findUnique')
-        .mockResolvedValue(mockCrypto);
+      jest.spyOn(prisma.cryptocurrency, 'findUnique').mockResolvedValue({
+        id: mockCrypto.id,
+        name: mockCrypto.name,
+        symbol: mockCrypto.symbol,
+        image: mockCrypto.image,
+      } as any);
       jest
         .spyOn(prisma.marketData, 'findMany')
-        .mockResolvedValue(mockMarketDataArray);
+        .mockResolvedValue(mockMarketDataArray as any);
       // act
       const result = await service.findByCryptoID(mockCrypto.id);
       // assert
-      expect(result).toEqual(mockMarketDataArray);
+      expect(result).toEqual({
+        marketData: mockMarketDataArray,
+        crypto: {
+          id: mockCrypto.id,
+          name: mockCrypto.name,
+          symbol: mockCrypto.symbol,
+          image: mockCrypto.image,
+        },
+      });
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(prisma.cryptocurrency.findUnique).toHaveBeenCalledWith({
         where: {
           id: mockCrypto.id,
+        },
+        select: {
+          id: true,
+          name: true,
+          symbol: true,
+          image: true,
         },
       });
     });
@@ -221,6 +238,15 @@ describe('MarketDataService', () => {
         where: { cryptocurrencyId: mockCrypto.id },
         orderBy: {
           timestamp: 'desc',
+        },
+        include: {
+          cryptocurrency: {
+            select: {
+              symbol: true,
+              name: true,
+              image: true,
+            },
+          },
         },
       });
     });

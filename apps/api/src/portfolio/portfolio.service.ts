@@ -39,20 +39,26 @@ export class PortfolioService {
       select: { currentPrice: true },
     });
     if (!latestPrice) {
+      console.log(
+        '[ERROR] Latest price not found for crypto:',
+        createTransactionDto.cryptocurrencyId,
+      );
       throw new NotFoundException('latestPrice de la crypto est introuvable');
     }
-    console.log(latestPrice, 'latest');
+    console.log('[DEBUG] Latest price:', latestPrice);
     const portfolio = await this.prisma.portfolio.findUnique({
       where: { userId },
     });
     if (!portfolio) {
+      console.log('[ERROR] Portfolio not found for user:', userId);
       throw new NotFoundException('portfolio introuvable');
     }
+    console.log('[DEBUG] Portfolio found:', portfolio.id);
     const cryptoTotals = await this.getCryptoTotalsInPortfolio(
       portfolio.id,
       createTransactionDto.cryptocurrencyId,
     );
-    console.log(cryptoTotals);
+    console.log('[DEBUG] Crypto totals:', cryptoTotals);
     if (
       createTransactionDto.type == 'SELL' &&
       cryptoTotals.totalBought - cryptoTotals.totalSold <
