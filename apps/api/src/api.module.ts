@@ -12,6 +12,8 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { DatabaseModule } from 'libs/database/src';
 import { PaymentsModule } from './payments/payments.module';
 import { PredictionsModule } from './predictions/predictions.module';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { MetricsModule } from './common/metrics/metrics.module';
 
 @Module({
   imports: [
@@ -19,6 +21,14 @@ import { PredictionsModule } from './predictions/predictions.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    // Prometheus Metrics
+    PrometheusModule.register({
+      defaultMetrics: {
+        enabled: true,
+      },
+      path: '/metrics',
+    }),
+    MetricsModule, // Importe le MetricsModule qui fournit les métriques custom
     DatabaseModule,
     AuthModule,
     UsersModule,

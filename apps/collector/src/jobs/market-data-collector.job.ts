@@ -11,6 +11,7 @@ import { CoingeckoClientService } from '../services/coingecko-client.service';
 import { DataTransformerService } from '../services/data-transformer.service';
 import { StorageService } from '../services/storage.service';
 import { MarketDataEventService } from '../services/market-data-event.service';
+import { CollectorMetricsService } from '../metrics/collector-metrics.service';
 
 @Processor('market-data-collection')
 export class MarketDataCollectorJob {
@@ -21,6 +22,7 @@ export class MarketDataCollectorJob {
     private dataTransformer: DataTransformerService,
     private storage: StorageService,
     private marketDataEvent: MarketDataEventService,
+    private metricsService: CollectorMetricsService,
   ) {}
 
   @Process('collect')
@@ -41,6 +43,7 @@ export class MarketDataCollectorJob {
         await this.coingeckoClient.fetchMarketData(cryptoIds);
 
       for (const apiData of marketDataList) {
+        const cryptoStartTime = Date.now();
         try {
           // 2.1 Upsert cryptocurrency
           const cryptoEntity =
@@ -58,12 +61,35 @@ export class MarketDataCollectorJob {
             cryptocurrency.id,
             apiData.current_price,
           );
+
+          // Métriques : succès et prix
+          const duration = (Date.now() - cryptoStartTime) / 1000;
+          this.metricsService.updateCryptoPrice(
+            apiData.symbol.toUpperCase(),
+            apiData.name,
+            apiData.current_price,
+          );
+          this.metricsService.recordCollectionDuration(
+            apiData.symbol.toUpperCase(),
+            duration,
+          );
+          this.metricsService.incrementCollectionSuccess(
+            apiData.symbol.toUpperCase(),
+          );
+
           this.logger.log(
             `✅ Processed ${apiData.symbol.toUpperCase()} successfully + event emitted`,
           );
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : 'Unknown error';
+
+          // Métriques : erreur
+          this.metricsService.incrementCollectionError(
+            apiData.symbol.toUpperCase(),
+            error instanceof Error ? error.name : 'UnknownError',
+          );
+
           this.logger.error(
             `Failed to process ${apiData.symbol}: ${errorMessage}`,
           );
@@ -75,6 +101,13 @@ export class MarketDataCollectorJob {
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       const errorStack = error instanceof Error ? error.stack : undefined;
+
+      // Métriques : erreur globale
+      this.metricsService.incrementCollectionError(
+        'ALL',
+        error instanceof Error ? error.name : 'UnknownError',
+      );
+
       this.logger.error(`Collection failed: ${errorMessage}`, errorStack);
       throw error;
     }

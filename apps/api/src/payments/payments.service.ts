@@ -9,21 +9,30 @@ import Stripe from 'stripe';
 
 @Injectable()
 export class PaymentsService {
-  private stripe: Stripe;
+  private stripe: Stripe | null = null;
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
   ) {
-    this.stripe = new Stripe(
-      this.configService.get<string>('STRIPE_SECRET_KEY') || '',
-    );
+    const stripeKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+    if (stripeKey && stripeKey.startsWith('sk_')) {
+      this.stripe = new Stripe(stripeKey);
+    } else {
+      console.warn('⚠️  Stripe non configuré - Les paiements sont désactivés');
+    }
   }
 
   /**
    * Crée une session de paiement Stripe pour déposer de l'argent
    */
   async createDepositSession(userId: string, amount: number) {
+    if (!this.stripe) {
+      throw new BadRequestException(
+        'Les paiements Stripe ne sont pas configurés',
+      );
+    }
+
     if (amount < 1) {
       throw new BadRequestException('Le montant minimum est de 1€');
     }
@@ -86,6 +95,12 @@ export class PaymentsService {
    * Gère le webhook Stripe pour confirmer les paiements
    */
   async handleStripeWebhook(payload: Buffer, signature: string) {
+    if (!this.stripe) {
+      throw new BadRequestException(
+        'Les paiements Stripe ne sont pas configurés',
+      );
+    }
+
     const webhookSecret = this.configService.get<string>(
       'STRIPE_WEBHOOK_SECRET',
     );
@@ -174,6 +189,12 @@ export class PaymentsService {
    * (Alternative au webhook - utile en développement local)
    */
   async confirmDeposit(sessionId: string, userId: string) {
+    if (!this.stripe) {
+      throw new BadRequestException(
+        'Les paiements Stripe ne sont pas configurés',
+      );
+    }
+
     // Vérifier que le dépôt existe et appartient à l'utilisateur
     const deposit = await this.prisma.deposit.findUnique({
       where: { stripeSessionId: sessionId },

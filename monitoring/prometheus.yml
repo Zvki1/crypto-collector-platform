@@ -1,0 +1,30 @@
+# Prometheus Configuration
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'crypto-collector-platform'
+
+rule_files:
+  - 'alerts.yml'
+
+scrape_configs:
+  - job_name: 'crypto-api'
+    static_configs:
+      - targets: ['host.docker.internal:3000']
+        labels:
+          service: 'api'
+          environment: 'development'
+
+  - job_name: 'crypto-collector'
+    static_configs:
+      - targets: ['collector:10000']
+        labels:
+          service: 'collector'
+          environment: 'development'
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'

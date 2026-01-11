@@ -12,6 +12,8 @@ import { CollectorScheduler } from './collector.scheduler';
 import { HealthController } from './health/health.controller';
 import { MarketDataEventService } from './services/market-data-event.service';
 import { TestController } from './test/test.controller';
+import { PrometheusModule } from '@willsoto/nestjs-prometheus';
+import { CollectorMetricsModule } from './metrics/collector-metrics.module';
 
 @Module({
   imports: [
@@ -20,6 +22,14 @@ import { TestController } from './test/test.controller';
       load: [collectorConfig],
       envFilePath: '.env',
     }),
+    // Prometheus Metrics
+    PrometheusModule.register({
+      defaultMetrics: {
+        enabled: true,
+      },
+      path: '/metrics',
+    }),
+    CollectorMetricsModule,
     DatabaseModule,
     BullModule.forRootAsync({
       useFactory: () => ({

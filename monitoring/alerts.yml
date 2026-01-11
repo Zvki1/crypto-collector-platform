@@ -1,0 +1,59 @@
+groups:
+  - name: crypto_platform_alerts
+    interval: 30s
+    rules:
+      - alert: APIDown
+        expr: up{job="crypto-api"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'API Crypto est DOWN'
+          description: "L'API n'a pas répondu depuis 2 minutes."
+
+      - alert: CollectorDown
+        expr: up{job="crypto-collector"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Collector est DOWN'
+          description: "Le service collector n'a pas répondu depuis 5 minutes."
+
+      # Alerte si taux d'erreur HTTP > 5%
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[5m])) 
+            / 
+            sum(rate(http_requests_total[5m]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Taux d'erreur HTTP élevé"
+          description: 'Plus de 5% des requêtes HTTP sont en erreur 5xx.'
+
+      # Alerte si temps de réponse > 1s
+      - alert: SlowResponseTime
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Temps de réponse lent'
+          description: '95% des requêtes prennent plus de 1 seconde.'
+
+      # Alerte si échec de collection de cryptos  
+      - alert: CryptoCollectionFailing
+        expr: rate(crypto_collection_errors_total[10m]) > 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Échecs de collection de cryptos'
+          description: 'Plus de 10% des tentatives de collection échouent.'

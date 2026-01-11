@@ -1,6 +1,8 @@
-
-
 services:
+  # ================================
+  # DATABASES & CACHE
+  # ================================
+
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
@@ -11,11 +13,16 @@ services:
       POSTGRES_PASSWORD: crypto_password_dev
       POSTGRES_DB: crypto_platform
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - crypto_network
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U crypto_user -d crypto_platform']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Redis (Bull Queue)
   redis:
@@ -23,30 +30,189 @@ services:
     container_name: crypto_redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     networks:
       - crypto_network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ================================
+  # APPLICATION SERVICES
+  # ================================
+
+  # API NestJS
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: crypto_api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://crypto_user:crypto_password_dev@postgres:5432/crypto_platform
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-7d}
+      COINGECKO_API_KEY: ${COINGECKO_API_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD:-}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+    ports:
+      - '3000:3000'
+    networks:
+      - crypto_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./prisma:/app/prisma
+    command: sh -c "npx prisma migrate deploy && node dist/apps/api/main.js"
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Collector Service
+  collector:
+    build:
+      context: .
+      dockerfile: apps/collector/Dockerfile
+    container_name: crypto_collector
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 10000
+      DATABASE_URL: postgresql://crypto_user:crypto_password_dev@postgres:5432/crypto_platform
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      COINGECKO_API_KEY: ${COINGECKO_API_KEY:-}
+      COINMARKETCAP_API_KEY: ${COINMARKETCAP_API_KEY:-}
+    ports:
+      - '10000:10000'
+    networks:
+      - crypto_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./prisma:/app/prisma
+
+  # Frontend React (avec Vite dev server - SANS Nginx)
+  frontend:
+    build:
+      context: ./Cryptocollectorfront
+      dockerfile: Dockerfile.dev
+      target: development
+    container_name: crypto_frontend
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    ports:
+      - '5173:5173'
+    volumes:
+      - ./Cryptocollectorfront:/app
+      - /app/node_modules
+    networks:
+      - crypto_network
+    depends_on:
+      - api
+    command: npm run dev -- --host 0.0.0.0
+
+  # ================================
+  # MANAGEMENT TOOLS
+  # ================================
 
   # PgAdmin db visualization
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: crypto_pgadmin
-    # restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: rzaki@hotmail.fr
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "5050:80"
+      - '5050:80'
     networks:
       - crypto_network
     depends_on:
       - postgres
 
+  # ================================
+  # MONITORING (optionnel - commentez si non nécessaire)
+  # ================================
+
+  # Prometheus - Collecte et stockage des métriques
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: crypto_prometheus
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - crypto_network
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
+  # Grafana - Dashboards et visualisation
+  grafana:
+    image: grafana/grafana:latest
+    container_name: crypto_grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+      - GF_INSTALL_PLUGINS=
+    ports:
+      - '3001:3000'
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./monitoring/grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - crypto_network
+    depends_on:
+      - prometheus
+
 volumes:
   postgres_data:
   redis_data:
+  prometheus_data:
+  grafana_data:
 
 networks:
   crypto_network:
