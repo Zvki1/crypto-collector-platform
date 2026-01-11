@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Nécessaire pour SonarCloud
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -39,5 +41,11 @@ jobs:
       - name: Build Collector
         run: npm run build -- collector
 
-      - name: Run tests
-        run: npm test
+      - name: Run tests with coverage
+        run: npm run test:cov
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
