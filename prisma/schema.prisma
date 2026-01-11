@@ -128,14 +128,44 @@ enum UserRole {
 model Portfolio {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @unique @map("user_id") @db.Uuid 
+  balance   Decimal  @default(0) @db.Decimal(20, 2) // Solde en euros
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   transactions Transaction[]
+  deposits     Deposit[]
 
   @@map("portfolios")
+}
+
+// ============================================
+// Deposit Model (Stripe payments)
+// ============================================
+model Deposit {
+  id                String        @id @default(uuid()) @db.Uuid
+  portfolioId       String        @map("portfolio_id") @db.Uuid
+  amount            Decimal       @db.Decimal(20, 2) // Montant en euros
+  stripePaymentId   String?       @unique @map("stripe_payment_id") @db.VarChar(255)
+  stripeSessionId   String?       @unique @map("stripe_session_id") @db.VarChar(255)
+  status            DepositStatus @default(PENDING)
+  createdAt         DateTime      @default(now()) @map("created_at")
+  completedAt       DateTime?     @map("completed_at")
+
+  // Relations
+  portfolio Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+
+  @@index([portfolioId])
+  @@index([status])
+  @@map("deposits")
+}
+
+enum DepositStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
 }
 // ============================================
 // Transaction Model
