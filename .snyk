@@ -1,0 +1,18 @@
+# Configuration Snyk pour la détection des vulnérabilités
+# Documentation: https://docs.snyk.io/
+
+# Ignorer certains chemins lors du scan
+exclude:
+  - node_modules/
+  - dist/
+  - coverage/
+  - .git/
+
+# Niveau de sévérité minimum à rapporter
+# Options: low, medium, high, critical
+severity-threshold: medium
+
+# Politique de correction automatique
+patch:
+  'npm:*':
+    patched: true

@@ -44,6 +44,21 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:cov
 
+      - name: Run Snyk Security Test
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --json-file-output=snyk-report.json
+
+      - name: Upload Snyk report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: snyk-security-report
+          path: snyk-report.json
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         env:

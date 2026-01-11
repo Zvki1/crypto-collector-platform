@@ -61,3 +61,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 constants.ts
 
 docs
+
+# Security reports
+security-report.json
+security-report.html

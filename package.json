@@ -24,7 +24,12 @@
     "perf:stress": "k6 run performance-tests/stress-test.js",
     "perf:auth": "k6 run performance-tests/scenarios/auth-flow.js",
     "perf:cryptos": "k6 run performance-tests/scenarios/crypto-endpoints.js",
-    "perf:all": "npm run perf:test && npm run perf:spike && npm run perf:auth && npm run perf:cryptos"
+    "perf:all": "npm run perf:test && npm run perf:spike && npm run perf:auth && npm run perf:cryptos",
+    "security:test": "snyk test --severity-threshold=medium",
+    "security:critical": "snyk test --severity-threshold=critical",
+    "security:report": "snyk test --json | snyk-to-html -o security-report.html",
+    "security:code": "snyk code test",
+    "security:monitor": "snyk monitor"
   },
   "dependencies": {
     "@bull-board/api": "^6.14.1",
