@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { PortfolioService } from './portfolio.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth-guard.guard';
 import { CreateTransactionDto } from './dto/CreateTransaction.dto';
@@ -27,6 +20,10 @@ export class PortfolioController {
   @Get('overview')
   async findOverview(@UserId() userId: string) {
     return this.portfolioService.getPortfolioOverview(userId);
+  }
+  @Get('balance')
+  async getBalance(@UserId() userId: string) {
+    return this.portfolioService.getBalance(userId);
   }
   @Post('transaction')
   async createTransaction(

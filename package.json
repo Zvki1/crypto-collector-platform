@@ -47,7 +47,8 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "stripe": "^20.1.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
@@ -101,7 +102,9 @@
     ],
     "moduleNameMapper": {
       "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1",
-      "^@app/database(|/.*)$": "<rootDir>/libs/database/src/$1"
+      "^@app/database(|/.*)$": "<rootDir>/libs/database/src/$1",
+      "^libs/common/src(|/.*)$": "<rootDir>/libs/common/src/$1",
+      "^libs/database/src(|/.*)$": "<rootDir>/libs/database/src/$1"
     }
   }
 }

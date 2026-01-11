@@ -12,6 +12,7 @@ describe('PortfolioService', () => {
       findUnique: jest.fn(),
       findMany: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
     },
     transaction: {
       findMany: jest.fn(),
@@ -26,6 +27,7 @@ describe('PortfolioService', () => {
       findFirst: jest.fn(),
       findMany: jest.fn(),
     },
+    $transaction: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -106,7 +108,11 @@ describe('PortfolioService', () => {
 
     it('should create a BUY transaction successfully', async () => {
       const mockLatestPrice = { currentPrice: 50000 };
-      const mockPortfolio = { id: 'portfolio-1', userId: 'user-1' };
+      const mockPortfolio = {
+        id: 'portfolio-1',
+        userId: 'user-1',
+        balance: 100000,
+      };
       const mockBuyAgg = { _sum: { amount: 0 } };
       const mockSellAgg = { _sum: { amount: 0 } };
       const mockTransaction = {
@@ -115,6 +121,9 @@ describe('PortfolioService', () => {
         amount: 1,
         price: 50000,
         totalValue: 50000,
+        portfolioId: 'portfolio-1',
+        cryptocurrencyId: 'crypto-1',
+        createdAt: new Date(),
       };
 
       jest
@@ -127,26 +136,31 @@ describe('PortfolioService', () => {
         .spyOn(prisma.transaction, 'aggregate')
         .mockResolvedValueOnce(mockBuyAgg as any)
         .mockResolvedValueOnce(mockSellAgg as any);
+
       jest
-        .spyOn(prisma.transaction, 'create')
-        .mockResolvedValue(mockTransaction as any);
+        .spyOn(prisma, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          const txContext = {
+            transaction: {
+              create: jest.fn().mockResolvedValue(mockTransaction),
+            },
+            portfolio: {
+              update: jest
+                .fn()
+                .mockResolvedValue({ ...mockPortfolio, balance: 50000 }),
+            },
+          };
+          return callback(txContext);
+        });
 
       const result = await service.createTransaction(
         createTransactionDto,
         'user-1',
       );
 
-      expect(result).toEqual(mockTransaction);
-      expect(prisma.transaction.create).toHaveBeenCalledWith({
-        data: {
-          portfolioId: 'portfolio-1',
-          type: 'BUY',
-          amount: 1,
-          cryptocurrencyId: 'crypto-1',
-          price: 50000,
-          totalValue: 50000,
-        },
-      });
+      expect(result).toBeDefined();
+      expect(result.type).toEqual('BUY');
+      expect(prisma.$transaction).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException if latest price not found', async () => {

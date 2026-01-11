@@ -46,6 +46,7 @@ export class PortfolioService {
       throw new NotFoundException('latestPrice de la crypto est introuvable');
     }
     console.log('[DEBUG] Latest price:', latestPrice);
+
     const portfolio = await this.prisma.portfolio.findUnique({
       where: { userId },
     });
@@ -54,32 +55,79 @@ export class PortfolioService {
       throw new NotFoundException('portfolio introuvable');
     }
     console.log('[DEBUG] Portfolio found:', portfolio.id);
-    const cryptoTotals = await this.getCryptoTotalsInPortfolio(
-      portfolio.id,
-      createTransactionDto.cryptocurrencyId,
-    );
-    console.log('[DEBUG] Crypto totals:', cryptoTotals);
-    if (
-      createTransactionDto.type == 'SELL' &&
-      cryptoTotals.totalBought - cryptoTotals.totalSold <
-        createTransactionDto.amount
-    ) {
-      throw new BadRequestException(
-        `Vous ne pouvez pas vendre plus que ce que vous possédez. ` +
-          `Quantité actuelle ${cryptoTotals.totalBought - cryptoTotals.totalSold}`,
-      );
+
+    const totalCost =
+      createTransactionDto.amount * Number(latestPrice.currentPrice);
+
+    // Logique pour ACHAT - vérifier le solde
+    if (createTransactionDto.type === 'BUY') {
+      const currentBalance = Number(portfolio.balance);
+      if (currentBalance < totalCost) {
+        throw new BadRequestException(
+          `Solde insuffisant. Vous avez ${currentBalance.toFixed(2)}€ mais l'achat coûte ${totalCost.toFixed(2)}€. ` +
+            `Veuillez d'abord déposer des fonds.`,
+        );
+      }
     }
-    const transaction = await this.prisma.transaction.create({
-      data: {
-        portfolioId: portfolio.id,
-        type: createTransactionDto.type,
-        amount: createTransactionDto.amount,
-        cryptocurrencyId: createTransactionDto.cryptocurrencyId,
-        price: latestPrice.currentPrice,
-        totalValue:
-          createTransactionDto.amount * Number(latestPrice.currentPrice),
-      },
+
+    // Logique pour VENTE - vérifier les holdings
+    if (createTransactionDto.type === 'SELL') {
+      const cryptoTotals = await this.getCryptoTotalsInPortfolio(
+        portfolio.id,
+        createTransactionDto.cryptocurrencyId,
+      );
+      console.log('[DEBUG] Crypto totals:', cryptoTotals);
+
+      const availableQuantity =
+        cryptoTotals.totalBought - cryptoTotals.totalSold;
+      if (availableQuantity < createTransactionDto.amount) {
+        throw new BadRequestException(
+          `Vous ne pouvez pas vendre plus que ce que vous possédez. ` +
+            `Quantité actuelle: ${availableQuantity}`,
+        );
+      }
+    }
+
+    // Transaction atomique pour créer la transaction et mettre à jour le solde
+    const transaction = await this.prisma.$transaction(async (tx) => {
+      // Créer la transaction
+      const newTransaction = await tx.transaction.create({
+        data: {
+          portfolioId: portfolio.id,
+          type: createTransactionDto.type,
+          amount: createTransactionDto.amount,
+          cryptocurrencyId: createTransactionDto.cryptocurrencyId,
+          price: latestPrice.currentPrice,
+          totalValue: totalCost,
+        },
+      });
+
+      // Mettre à jour le solde du portfolio
+      if (createTransactionDto.type === 'BUY') {
+        // Achat: déduire du solde
+        await tx.portfolio.update({
+          where: { id: portfolio.id },
+          data: {
+            balance: {
+              decrement: totalCost,
+            },
+          },
+        });
+      } else {
+        // Vente: ajouter au solde
+        await tx.portfolio.update({
+          where: { id: portfolio.id },
+          data: {
+            balance: {
+              increment: totalCost,
+            },
+          },
+        });
+      }
+
+      return newTransaction;
     });
+
     return transaction;
   }
 
@@ -199,5 +247,21 @@ export class PortfolioService {
       throw new NotFoundException('portfolio introuvable');
     }
     return portfolio.id;
+  }
+
+  // // // // // // // // // //
+  // getBalance
+  // // // // // // // // // //
+  async getBalance(userId: string) {
+    const portfolio = await this.prisma.portfolio.findUnique({
+      where: { userId },
+      select: { balance: true },
+    });
+
+    if (!portfolio) {
+      throw new NotFoundException('Portfolio introuvable');
+    }
+
+    return { balance: Number(portfolio.balance) };
   }
 }

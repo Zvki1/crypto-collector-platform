@@ -4,6 +4,12 @@ import { CoinGeckoMarketData } from 'apps/collector/types/coinGeckoMarketData';
 import axios, { AxiosInstance } from 'axios';
 import Bottleneck from 'bottleneck';
 
+export interface CoinGeckoMarketChartResponse {
+  prices: [number, number][];
+  market_caps: [number, number][];
+  total_volumes: [number, number][];
+}
+
 @Injectable()
 export class CoingeckoClientService {
   private readonly logger = new Logger(CoingeckoClientService.name);
@@ -57,6 +63,45 @@ export class CoingeckoClientService {
       this.logger.error(
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         `Failed to fetch market data: ${error.message}`,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  /**
+   * Récupère l'historique des prix pour une crypto sur X jours
+   */
+  async fetchMarketChart(
+    coingeckoId: string,
+    days: number,
+    currency: string = 'eur',
+  ): Promise<CoinGeckoMarketChartResponse> {
+    try {
+      const url = `/coins/${coingeckoId}/market_chart`;
+
+      this.logger.log(
+        `Fetching market chart for ${coingeckoId} (${days} days)`,
+      );
+
+      const response = await this.limiter.schedule(() =>
+        this.httpClient.get<CoinGeckoMarketChartResponse>(url, {
+          params: {
+            vs_currency: currency,
+            days,
+          },
+        }),
+      );
+
+      this.logger.log(
+        `Successfully fetched ${response.data.prices.length} price points for ${coingeckoId}`,
+      );
+      return response.data;
+    } catch (error) {
+      this.logger.error(
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        `Failed to fetch market chart for ${coingeckoId}: ${error.message}`,
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         error.stack,
       );

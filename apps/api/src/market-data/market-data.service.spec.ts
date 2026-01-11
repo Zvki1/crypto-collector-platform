@@ -55,7 +55,7 @@ describe('MarketDataService', () => {
       const mockMarketDataArray = [
         {
           id: '987fcdeb-51a2-3bc4-d567-890123456789',
-          createdAt: new Date('2025-11-28'),
+          createdAt: new Date('2025-11-28T10:00:00Z'),
           cryptocurrencyId: '123e4567-e89b-12d3-a456-426614174000',
           currentPrice: Decimal(43250.5),
           high24h: Decimal(43890.0),
@@ -83,12 +83,12 @@ describe('MarketDataService', () => {
           atl: Decimal(67.81),
           atlChangePercentage: Decimal(63700),
           atlDate: new Date('2013-07-06'),
-          lastUpdated: new Date('2025-11-28'),
-          timestamp: new Date('2025-11-28'),
+          lastUpdated: new Date('2025-11-28T10:00:00Z'),
+          timestamp: new Date('2025-11-28T10:00:00Z'),
         },
         {
           id: '876edcba-42b1-4ac5-c678-901234567890',
-          createdAt: new Date('2025-11-27'),
+          createdAt: new Date('2025-11-28T14:00:00Z'),
           cryptocurrencyId: '123e4567-e89b-12d3-a456-426614174000',
           currentPrice: Decimal(42800.0),
           high24h: Decimal(43500.0),
@@ -116,8 +116,8 @@ describe('MarketDataService', () => {
           atl: Decimal(67.81),
           atlChangePercentage: Decimal(63700),
           atlDate: new Date('2013-07-06'),
-          lastUpdated: new Date('2025-11-27'),
-          timestamp: new Date('2025-11-27'),
+          lastUpdated: new Date('2025-11-28T14:00:00Z'),
+          timestamp: new Date('2025-11-28T14:00:00Z'),
         },
       ];
       jest.spyOn(prisma.cryptocurrency, 'findUnique').mockResolvedValue({

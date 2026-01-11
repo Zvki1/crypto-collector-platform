@@ -4,7 +4,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ApiModule);
+  const app = await NestFactory.create(ApiModule, {
+    rawBody: true, // Nécessaire pour le webhook Stripe
+  });
   app.enableCors({
     origin: ['http://localhost:5173', 'http://localhost:3001'],
     credentials: true,

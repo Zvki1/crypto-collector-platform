@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config'; // ← Ajoute ça
+import { ConfigModule } from '@nestjs/config';
 import { ApiController } from './api.controller';
 import { ApiService } from './api.service';
 import { AuthModule } from './auth/auth.module';
@@ -10,6 +10,8 @@ import { PortfolioModule } from './portfolio/portfolio.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { DatabaseModule } from 'libs/database/src';
+import { PaymentsModule } from './payments/payments.module';
+import { PredictionsModule } from './predictions/predictions.module';
 
 @Module({
   imports: [
@@ -25,6 +27,8 @@ import { DatabaseModule } from 'libs/database/src';
     PortfolioModule,
     AlertsModule,
     NotificationsModule,
+    PaymentsModule,
+    PredictionsModule,
   ],
   controllers: [ApiController],
   providers: [ApiService],
