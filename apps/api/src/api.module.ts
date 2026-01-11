@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { BullModule } from '@nestjs/bull';
 import { ApiController } from './api.controller';
 import { ApiService } from './api.service';
 import { AuthModule } from './auth/auth.module';
@@ -20,6 +21,17 @@ import { MetricsModule } from './common/metrics/metrics.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+    }),
+    // Bull/Redis Configuration
+    BullModule.forRootAsync({
+      useFactory: () => ({
+        redis: process.env.REDIS_URL
+          ? process.env.REDIS_URL
+          : {
+              host: process.env.REDIS_HOST || 'localhost',
+              port: parseInt(process.env.REDIS_PORT || '6379', 10),
+            },
+      }),
     }),
     // Prometheus Metrics
     PrometheusModule.register({

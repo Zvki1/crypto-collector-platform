@@ -18,7 +18,13 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "NODE_ENV=test TEST_DATABASE_URL=postgresql://crypto_user:crypto_password_dev@localhost:5432/crypto_test jest --config ./apps/api/test/jest-e2e.json --runInBand --forceExit"
+    "test:e2e": "NODE_ENV=test TEST_DATABASE_URL=postgresql://crypto_user:crypto_password_dev@localhost:5432/crypto_test jest --config ./apps/api/test/jest-e2e.json --runInBand --forceExit",
+    "perf:test": "k6 run performance-tests/basic-load-test.js",
+    "perf:spike": "k6 run performance-tests/spike-test.js",
+    "perf:stress": "k6 run performance-tests/stress-test.js",
+    "perf:auth": "k6 run performance-tests/scenarios/auth-flow.js",
+    "perf:cryptos": "k6 run performance-tests/scenarios/crypto-endpoints.js",
+    "perf:all": "npm run perf:test && npm run perf:spike && npm run perf:auth && npm run perf:cryptos"
   },
   "dependencies": {
     "@bull-board/api": "^6.14.1",

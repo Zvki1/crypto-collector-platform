@@ -58,15 +58,17 @@ services:
       DATABASE_URL: postgresql://crypto_user:crypto_password_dev@postgres:5432/crypto_platform
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-7d}
       COINGECKO_API_KEY: ${COINGECKO_API_KEY:-}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
-      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
-      EMAIL_PORT: ${EMAIL_PORT:-587}
-      EMAIL_USER: ${EMAIL_USER:-}
-      EMAIL_PASSWORD: ${EMAIL_PASSWORD:-}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-noreply@cryptoapp.com}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
     ports:
       - '3000:3000'
@@ -106,6 +108,7 @@ services:
       DATABASE_URL: postgresql://crypto_user:crypto_password_dev@postgres:5432/crypto_platform
       REDIS_HOST: redis
       REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
       COINGECKO_API_KEY: ${COINGECKO_API_KEY:-}
       COINMARKETCAP_API_KEY: ${COINMARKETCAP_API_KEY:-}
     ports:

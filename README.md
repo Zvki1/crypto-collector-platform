@@ -300,6 +300,46 @@ Documentation complète disponible dans le dossier `docs/` :
 
 ---
 
+## 📊 Tests de Performance
+
+La plateforme inclut une suite complète de tests de performance avec **k6** pour évaluer la scalabilité et la latence du système.
+
+### 🚀 Démarrage rapide
+
+```bash
+# Installer k6
+brew install k6
+
+# Lancer le test basique
+npm run perf:test
+```
+
+### 📁 Tests disponibles
+
+| Commande               | Description            | Durée  | Utilisateurs |
+| ---------------------- | ---------------------- | ------ | ------------ |
+| `npm run perf:test`    | Test de charge basique | 30s    | 10           |
+| `npm run perf:spike`   | Test de pic de charge  | ~2min  | 2→50         |
+| `npm run perf:stress`  | Test de stress         | ~10min | 0→100        |
+| `npm run perf:auth`    | Test authentification  | 30s    | 5            |
+| `npm run perf:cryptos` | Test endpoints cryptos | ~4min  | 10→20        |
+| `npm run perf:all`     | Tous les tests         | ~20min | Variable     |
+
+### 📚 Documentation
+
+- 📖 [Guide de démarrage rapide](./performance-tests/QUICKSTART.md)
+- 📖 [Documentation complète](./performance-tests/PERFORMANCE_TESTING.md)
+- 📊 [Exemples de résultats](./performance-tests/EXAMPLES.md)
+
+### 🎯 Métriques clés
+
+- ✅ **Temps de réponse moyen** : < 200ms
+- ✅ **P95** (95e percentile) : < 500ms
+- ✅ **Taux d'erreur** : < 1%
+- ✅ **Débit** : > 50 requêtes/seconde
+
+---
+
 ## 🤝 Contribution
 
 Les contributions sont les bienvenues ! N'hésitez pas à :
