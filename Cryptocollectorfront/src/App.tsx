@@ -3,51 +3,31 @@ import {
   Routes,
   Route,
   Navigate,
-} from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import DashboardPage from './pages/DashboardPage';
-import CryptoListPage from './pages/CryptoListPage';
-import AlertsPage from './pages/AlertsPage';
-import PortfolioPage from './pages/PortfolioPage';
-import AnalysisPage from './pages/AnalysisPage';
-import ForecastPage from './pages/ForecastPage';
-import AdminPage from './pages/AdminPage';
-import Layout from './components/Layout';
-
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import ResetPasswordPage from './pages/ResetPasswordPage';
-import DashboardPage from './pages/DashboardPage';
-import CryptoListPage from './pages/CryptoListPage';
-import AlertsPage from './pages/AlertsPage';
-import PortfolioPage from './pages/PortfolioPage';
-import AnalysisPage from './pages/AnalysisPage';
-import ForecastPage from './pages/ForecastPage';
-import AdminPage from './pages/AdminPage';
-import Layout from './components/Layout';
-import { authService } from './services/auth.service';
+} from "react-router-dom";
+import { useState, useEffect } from "react";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import DashboardPage from "./pages/DashboardPage";
+import CryptoListPage from "./pages/CryptoListPage";
+import AlertsPage from "./pages/AlertsPage";
+import PortfolioPage from "./pages/PortfolioPage";
+import ForecastPage from "./pages/ForecastPage";
+import AdminPage from "./pages/AdminPage";
+import Layout from "./components/Layout";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { authService } from "./services/api";
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    // Charger l'utilisateur depuis le localStorage (token + user)
+    // Vérifier si l'utilisateur est authentifié au chargement
     const isAuth = authService.isAuthenticated();
-    const currentUser = authService.getCurrentUser();
-
-    if (isAuth && currentUser) {
-      setUser(currentUser);
+    if (isAuth) {
+      const storedUser = authService.getUser();
+      setUser(storedUser);
       setIsAuthenticated(true);
     }
   }, []);
@@ -58,11 +38,9 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    authService.logout();
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('cryptoUser');
-    localStorage.removeItem('access_token');
-    localStorage.removeItem('user');
   };
 
   return (
@@ -102,11 +80,9 @@ export default function App() {
         <Route
           path="/"
           element={
-            isAuthenticated ? (
+            <ProtectedRoute>
               <Layout user={user} onLogout={handleLogout} />
-            ) : (
-              <Navigate to="/connexion" />
-            )
+            </ProtectedRoute>
           }
         >
           <Route index element={<Navigate to="/tableau-de-bord" />} />
@@ -114,9 +90,17 @@ export default function App() {
           <Route path="cryptomonnaies" element={<CryptoListPage />} />
           <Route path="alertes" element={<AlertsPage />} />
           <Route path="portefeuille" element={<PortfolioPage />} />
-          <Route path="analyse" element={<AnalysisPage />} />
+          <Route path="portfolio" element={<PortfolioPage />} />{" "}
+          {/* Route temporaire pour Stripe */}
           <Route path="previsions" element={<ForecastPage />} />
-          <Route path="admin" element={<AdminPage user={user} />} />
+          <Route
+            path="admin"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <AdminPage user={user} />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </Router>

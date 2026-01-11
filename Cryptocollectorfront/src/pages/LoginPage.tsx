@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-import { Label } from '../components/ui/label';
+import { useState, FormEvent } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 import {
   Card,
   CardContent,
@@ -10,9 +10,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '../components/ui/card';
-import { Bitcoin, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import { authService } from '../services/auth.service';
+} from "../components/ui/card";
+import { Bitcoin, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { authService } from "../services/api";
 
 interface LoginPageProps {
   onLogin: (user: any) => void;
@@ -20,45 +20,33 @@ interface LoginPageProps {
 
 export default function LoginPage({ onLogin }: LoginPageProps) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
-
-    if (!email || !password) {
-      setError('Veuillez remplir tous les champs');
-      return;
-    }
-
     setLoading(true);
+    setError("");
 
     try {
       const response = await authService.login({ email, password });
 
-      // Le token est déjà sauvegardé dans localStorage par authService
-      // Mettre à jour l'état de l'utilisateur dans l'app
-      onLogin(response.user);
+      // Mettre à jour l'état de l'application avec l'utilisateur
+      onLogin({
+        id: response.user.id,
+        email: response.user.email,
+        name: response.user.username,
+        role: response.user.role,
+      });
 
-      navigate('/tableau-de-bord');
-    } catch (error: any) {
-      console.error('Erreur de connexion:', error);
-
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
-      } else if (error.response?.status === 401) {
-        setError('Email ou mot de passe incorrect');
-      } else if (error.message === 'Network Error') {
-        setError(
-          'Erreur de connexion au serveur. Vérifiez que le backend est démarré.',
-        );
-      } else {
-        setError('Une erreur est survenue lors de la connexion');
-      }
+      navigate("/tableau-de-bord");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erreur de connexion";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -81,8 +69,8 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-2">
-                <AlertCircle className="size-5 flex-shrink-0" />
+              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-start gap-3">
+                <AlertCircle className="size-5 mt-0.5 flex-shrink-0" />
                 <p className="text-sm">{error}</p>
               </div>
             )}
@@ -102,7 +90,7 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               <div className="relative">
                 <Input
                   id="password"
-                  type={showPassword ? 'text' : 'password'}
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -134,10 +122,10 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
               className="w-full bg-blue-600 hover:bg-blue-700"
               disabled={loading}
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              {loading ? "Connexion..." : "Se connecter"}
             </Button>
             <p className="text-center text-slate-600">
-              Pas encore de compte?{' '}
+              Pas encore de compte?{" "}
               <Link
                 to="/inscription"
                 className="text-blue-600 hover:text-blue-700"
@@ -148,9 +136,6 @@ export default function LoginPage({ onLogin }: LoginPageProps) {
           </CardFooter>
         </form>
       </Card>
-      <div className="fixed bottom-4 left-4 text-slate-500 bg-white px-3 py-2 rounded-lg shadow">
-        💡 Créez un compte ou connectez-vous avec vos identifiants
-      </div>
     </div>
   );
 }
