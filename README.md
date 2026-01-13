@@ -34,7 +34,7 @@ Le systeme collecte automatiquement les donnees de marche depuis l'API CoinGecko
 - Dashboard de monitoring Bull Board
 - Metriques Prometheus
 
-### Frontend (React + TypeScript)
+### Frontend
 
 - Interface de connexion et inscription
 - Tableau de bord principal
@@ -51,6 +51,24 @@ Le systeme collecte automatiquement les donnees de marche depuis l'API CoinGecko
 - Redis pour les files d'attente
 - Docker Compose pour l'orchestration
 - Prometheus et Grafana pour le monitoring
+
+---
+
+## Technologies
+
+- NestJS 11
+- TypeScript 5.7
+- Prisma 6.19
+- PostgreSQL 15
+- Redis 7
+- Bull Queue
+- React 18
+- Stripe
+- Prometheus
+- Grafana
+- SonarQube
+- Snyk
+- K6
 
 ---
 
@@ -164,25 +182,6 @@ npm run lint
 # Tests de performance
 npm run perf:test
 ```
-
----
-
-## Technologies
-
-- NestJS 11
-- TypeScript 5.7
-- Prisma 6.19
-- PostgreSQL 15
-- Redis 7
-- Bull Queue
-- React 18
-- Stripe
-- Prometheus
-- Grafana
-- SonarQube
-- Snyk
-- K6
-
 ---
 
 ## Contact
