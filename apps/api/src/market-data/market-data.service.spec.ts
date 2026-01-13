@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { MarketDataService } from './market-data.service';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 import { NotFoundException } from '@nestjs/common';
 
 describe('MarketDataService', () => {

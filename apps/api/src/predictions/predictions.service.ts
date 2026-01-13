@@ -3,7 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 
 interface PredictionPoint {
   date: Date;

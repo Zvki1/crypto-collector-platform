@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 import { Prisma, Cryptocurrency, MarketData } from '@prisma/client';
 
 @Injectable()

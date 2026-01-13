@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AlertsService } from './alerts.service';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { AlertStatus } from '@prisma/client';
 

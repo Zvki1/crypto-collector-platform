@@ -1,4 +1,4 @@
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { MarketData } from '@prisma/client';
 

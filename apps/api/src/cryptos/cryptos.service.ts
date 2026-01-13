@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,

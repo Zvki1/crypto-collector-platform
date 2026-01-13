@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AlertCheckerProcessor } from './alert-checker.processor';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 import { getQueueToken } from '@nestjs/bull';
 import { AlertStatus, AlertType } from '@prisma/client';
 import { Job } from 'bull';

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { PaymentsController } from './payments.controller';
-import { DatabaseModule } from 'libs/database/src';
+import { DatabaseModule } from '@app/database';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 

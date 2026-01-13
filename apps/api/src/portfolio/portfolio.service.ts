@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { CreateTransactionDto } from './dto/CreateTransaction.dto';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 
 @Injectable()
 export class PortfolioService {

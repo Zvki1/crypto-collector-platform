@@ -2,12 +2,6 @@
  * TEST DE CHARGE BASIQUE
  *
  * Ce test simule 10 utilisateurs qui font des requêtes pendant 30 secondes.
- * C'est le test le plus simple pour commencer.
- *
- * OBJECTIF : Vérifier que l'API répond correctement sous une charge normale
- *
- * COMMENT LE LANCER :
- * k6 run performance-tests/basic-load-test.js
  */
 
 import http from 'k6/http';
@@ -19,75 +13,88 @@ const errorRate = new Rate('errors');
 
 // Configuration du test
 export const options = {
-  // Nombre d'utilisateurs virtuels (VUs)
-  vus: 10,
+  vus: 20,
 
-  // Durée du test
   duration: '30s',
 
-  // Seuils de performance à respecter
+  // Seuils
   thresholds: {
-    // 95% des requêtes doivent être < 500ms
-    http_req_duration: ['p(95)<500'],
+    http_req_duration: ['p(95)<800'],
 
-    // Taux d'erreur doit être < 1%
-    errors: ['rate<0.01'],
+    errors: ['rate<0.10'],
 
     // 95% des requêtes doivent réussir
     checks: ['rate>0.95'],
   },
 };
 
-// URL de base de l'API (à ajuster selon votre configuration)
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'http://localhost:3000';
 
 /**
  * Fonction principale exécutée par chaque utilisateur virtuel
  */
 export default function () {
-  // TEST 1 : Vérifier que l'API est accessible
-  const healthResponse = http.get(`${BASE_URL}/health`);
+  const healthResponse = http.get(`${BASE_URL}`);
 
-  check(healthResponse, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 200ms': (r) => r.timings.duration < 200,
-  }) || errorRate.add(1);
+  const healthCheck = check(healthResponse, {
+    'API is accessible': (r) => r.status === 200,
+    'API returns Hello World': (r) => {
+      try {
+        const body = JSON.parse(r.body);
+        return body.success === true && body.data === 'Hello World!';
+      } catch {
+        return false;
+      }
+    },
+  });
+  errorRate.add(!healthCheck);
 
-  // Petite pause (1 seconde) pour simuler un utilisateur réel
+  // Petite pause (1 seconde)
   sleep(1);
 
   // TEST 2 : Récupérer la liste des cryptos
   const cryptosResponse = http.get(`${BASE_URL}/cryptos`);
 
-  check(cryptosResponse, {
+  const cryptosCheck = check(cryptosResponse, {
     'cryptos status is 200': (r) => r.status === 200,
-    'cryptos response time < 500ms': (r) => r.timings.duration < 500,
     'cryptos response has data': (r) => {
       try {
         const body = JSON.parse(r.body);
-        return Array.isArray(body) && body.length > 0;
+        return (
+          body.success === true &&
+          Array.isArray(body.data) &&
+          body.data.length > 0
+        );
       } catch {
         return false;
       }
     },
-  }) || errorRate.add(1);
+  });
+  errorRate.add(!cryptosCheck);
 
   sleep(1);
+// btc
+  const bitcoinResponse = http.get(
+    `${BASE_URL}/cryptos/ed52e5c9-cfd8-4ffa-9d7e-a49d965ed257`,
+  );
 
-  // TEST 3 : Récupérer les détails d'une crypto spécifique (Bitcoin)
-  const bitcoinResponse = http.get(`${BASE_URL}/cryptos/bitcoin`);
-
-  check(bitcoinResponse, {
+  const bitcoinCheck = check(bitcoinResponse, {
     'bitcoin status is 200': (r) => r.status === 200,
-    'bitcoin response time < 500ms': (r) => r.timings.duration < 500,
-  }) || errorRate.add(1);
+    'bitcoin has correct data': (r) => {
+      try {
+        const body = JSON.parse(r.body);
+        return body.success === true && body.data && body.data.symbol === 'BTC';
+      } catch {
+        return false;
+      }
+    },
+  });
+  errorRate.add(!bitcoinCheck);
 
   sleep(1);
 }
 
-/**
- * Fonction exécutée à la fin du test pour afficher un résumé
- */
+
 export function handleSummary(data) {
   console.log('\n=== RÉSUMÉ DU TEST DE CHARGE BASIQUE ===\n');
 

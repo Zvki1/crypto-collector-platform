@@ -26,7 +26,7 @@ async function fetchMarketChart(
 ): Promise<CoinGeckoMarketChartResponse> {
   const url = `https://api.coingecko.com/api/v3/coins/${coingeckoId}/market_chart?vs_currency=eur&days=${days}`;
 
-  console.log(`📡 Fetching ${coingeckoId} (${days} days)...`);
+  console.log(`Fetching ${coingeckoId} (${days} days)...`);
 
   const response = await fetch(url, {
     headers: {
@@ -44,7 +44,7 @@ async function fetchMarketChart(
 }
 
 async function importHistoricalData() {
-  console.log("🚀 Démarrage de l'import des données historiques (1 an)\n");
+  console.log("Démarrage de l'import des données historiques (1 an)\n");
 
   // Récupérer toutes les cryptos trackées
   const cryptos = await prisma.cryptocurrency.findMany({
@@ -53,13 +53,13 @@ async function importHistoricalData() {
   });
 
   if (cryptos.length === 0) {
-    console.log('❌ Aucune crypto trouvée dans la base de données.');
+    console.log('Aucune crypto trouvée dans la base de données.');
     console.log('   Assure-toi que le collector a déjà importé les cryptos.');
     return;
   }
 
   console.log(
-    `📊 ${cryptos.length} cryptos à traiter: ${cryptos.map((c) => c.symbol).join(', ')}\n`,
+    `${cryptos.length} cryptos à traiter: ${cryptos.map((c) => c.symbol).join(', ')}\n`,
   );
 
   let totalImported = 0;
@@ -108,19 +108,19 @@ async function importHistoricalData() {
       }
 
       console.log(
-        `   ✅ ${crypto.symbol}: ${imported} importés, ${skipped} déjà existants\n`,
+        `   ${crypto.symbol}: ${imported} importés, ${skipped} déjà existants\n`,
       );
       totalImported += imported;
       totalSkipped += skipped;
     } catch (error) {
-      console.error(`   ❌ Erreur pour ${crypto.symbol}:`, error);
+      console.error(`   Erreur pour ${crypto.symbol}:`, error);
     }
   }
 
   console.log('═'.repeat(50));
-  console.log(`✨ Import terminé!`);
-  console.log(`   📈 Total importés: ${totalImported}`);
-  console.log(`   ⏭️  Total ignorés (doublons): ${totalSkipped}`);
+  console.log(`Import terminé!`);
+  console.log(`   total importés: ${totalImported}`);
+  console.log(`   Total ignorés (doublons): ${totalSkipped}`);
 }
 
 // Exécution

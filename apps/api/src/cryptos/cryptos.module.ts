@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CryptosService } from './cryptos.service';
 import { CryptosController } from './cryptos.controller';
-import { DatabaseModule } from 'libs/database/src';
+import { DatabaseModule } from '@app/database';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({

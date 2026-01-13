@@ -14,7 +14,7 @@ lerna-debug.log*
 
 # OS
 .DS_Store
-
+Thumbs.db
 # Tests
 /coverage
 /.nyc_output
@@ -65,3 +65,10 @@ docs
 # Security reports
 security-report.json
 security-report.html
+
+performance-tests/results/
+performance-tests/*.json
+performance-tests/*.html
+performance-tests/*.csv
+.DS_Store
+.DS_Store

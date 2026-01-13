@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import type { Job, Queue } from 'bull';
 import { AlertStatus, AlertType } from '@prisma/client';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 
 @Processor('market-data-events')
 export class AlertCheckerProcessor {

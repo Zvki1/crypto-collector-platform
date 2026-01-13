@@ -1,4 +1,3 @@
-# Configuration automatique de la datasource Prometheus dans Grafana
 apiVersion: 1
 
 datasources:

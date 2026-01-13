@@ -4,8 +4,8 @@ import {
   useState,
   useEffect,
   ReactNode,
-} from "react";
-import { authService } from "../services/api";
+} from 'react';
+import { authService } from '../services/api';
 
 interface User {
   id: string;
@@ -20,7 +20,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (
     email: string,
-    password: string
+    password: string,
   ) => Promise<{ success: boolean; user?: User; error?: string }>;
   logout: () => void;
   isAdmin: () => boolean;
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : "Erreur de connexion",
+        error: error instanceof Error ? error.message : 'Erreur de connexion',
       };
     }
   };
@@ -67,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const isAdmin = () => {
-    return user?.role === "admin";
+    return user?.role === 'admin';
   };
 
   return (
@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuthContext() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error("useAuthContext must be used within an AuthProvider");
+    throw new Error('useAuthContext must be used within an AuthProvider');
   }
   return context;
 }

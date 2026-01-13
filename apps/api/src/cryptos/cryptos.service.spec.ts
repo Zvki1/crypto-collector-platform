@@ -2,7 +2,7 @@
 // apps/api/src/cryptos/cryptos.service.spec.ts
 import { Test, TestingModule } from '@nestjs/testing';
 import { CryptosService } from './cryptos.service';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 import { HttpService } from '@nestjs/axios';
 import {
   BadRequestException,

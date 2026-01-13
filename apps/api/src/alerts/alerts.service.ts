@@ -8,7 +8,7 @@ import {
 import { CreateAlertDto } from './dto/createAlert.dto';
 import { UpdateAlertDto } from './dto/updateAlert.dto';
 import { AlertStatus } from '@prisma/client';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 
 @Injectable()
 export class AlertsService {

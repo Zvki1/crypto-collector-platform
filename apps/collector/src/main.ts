@@ -25,11 +25,23 @@ async function bootstrap() {
     redis: redisConfig,
   });
 
+  const marketDataEventsQueue = new Bull('market-data-events', {
+    redis: redisConfig,
+  });
+
+  const emailNotificationsQueue = new Bull('email-notifications', {
+    redis: redisConfig,
+  });
+
   const serverAdapter = new BullBoardExpressAdapter();
   serverAdapter.setBasePath('/admin/queues');
 
   createBullBoard({
-    queues: [new BullAdapter(marketDataQueue)],
+    queues: [
+      new BullAdapter(marketDataQueue),
+      new BullAdapter(marketDataEventsQueue),
+      new BullAdapter(emailNotificationsQueue),
+    ],
     serverAdapter: serverAdapter,
   });
 
@@ -39,18 +51,18 @@ async function bootstrap() {
 
   await app.listen(port, '0.0.0.0');
 
-  logger.log('🚀 Crypto Collector starting...');
-  logger.log(`📡 Server listening on port ${port}`);
-  logger.log('📊 Collecting data for: bitcoin, ethereum, solana');
-  logger.log('⏱️  Collection interval: 5 minutes');
+  logger.log('Crypto Collector starting...');
+  logger.log(`Server listening on port ${port}`);
+  logger.log('Collecting data for: bitcoin, ethereum, solana');
+  logger.log('Collection interval: 5 minutes');
 
   const baseUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${port}`;
-  logger.log(`📋 Bull Board dashboard available at: ${baseUrl}/admin/queues`);
-  logger.log(`🏥 Health check available at: ${baseUrl}/health`);
+  logger.log(`Bull Board dashboard available at: ${baseUrl}/admin/queues`);
+  logger.log(`Health check available at: ${baseUrl}/health`);
 
   await app.init();
 
-  logger.log('✅ Collector is running and will collect data periodically');
+  logger.log('Collector is running and will collect data periodically');
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   process.on('SIGTERM', async () => {

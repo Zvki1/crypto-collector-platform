@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 import Stripe from 'stripe';
 
 @Injectable()

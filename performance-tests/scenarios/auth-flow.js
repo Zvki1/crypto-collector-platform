@@ -29,7 +29,15 @@ export const options = {
   },
 };
 
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'http://localhost:3000';
+
+/**
+ * Fonction pour générer un username unique
+ */
+function generateUsername() {
+  const random = Math.floor(Math.random() * 100000);
+  return `user${random}`;
+}
 
 /**
  * Fonction pour générer un email unique
@@ -42,15 +50,16 @@ function generateEmail() {
 
 export default function () {
   const email = generateEmail();
-  const password = 'TestPassword123!';
+  const username = generateUsername();
+  const password = 'TestPassword123';
 
   // ═══════════════════════════════════════════════════════════
   // ÉTAPE 1 : INSCRIPTION
   // ═══════════════════════════════════════════════════════════
   const registerPayload = JSON.stringify({
     email: email,
+    username: username,
     password: password,
-    name: 'Test User',
   });
 
   const registerParams = {
@@ -67,10 +76,10 @@ export default function () {
 
   const registerSuccess = check(registerResponse, {
     '✓ Register status is 201': (r) => r.status === 201,
-    '✓ Register returns access token': (r) => {
+    '✓ Register returns user data': (r) => {
       try {
         const body = JSON.parse(r.body);
-        return body.access_token !== undefined;
+        return body.success === true && body.data && body.data.id;
       } catch {
         return false;
       }
@@ -102,12 +111,12 @@ export default function () {
   );
 
   const loginSuccess = check(loginResponse, {
-    '✓ Login status is 200': (r) => r.status === 200,
+    '✓ Login status is 200 or 201': (r) => r.status === 200 || r.status === 201,
     '✓ Login response time < 500ms': (r) => r.timings.duration < 500,
     '✓ Login returns access token': (r) => {
       try {
         const body = JSON.parse(r.body);
-        return body.access_token !== undefined;
+        return body.success === true && body.data && body.data.access_token;
       } catch {
         return false;
       }
@@ -126,7 +135,7 @@ export default function () {
   let token;
   try {
     const loginBody = JSON.parse(loginResponse.body);
-    token = loginBody.access_token;
+    token = loginBody.data.access_token;
   } catch (e) {
     console.log('❌ Failed to parse login response');
     errorRate.add(1);
@@ -145,10 +154,7 @@ export default function () {
   };
 
   // Exemple : Accéder au profil utilisateur
-  const profileResponse = http.get(
-    `${BASE_URL}/users/profile`,
-    protectedParams,
-  );
+  const profileResponse = http.get(`${BASE_URL}/users/me`, protectedParams);
 
   check(profileResponse, {
     '✓ Protected route status is 200': (r) => r.status === 200,
@@ -165,14 +171,14 @@ export function handleSummary(data) {
 
   const metrics = data.metrics;
 
-  console.log('🔐 AUTHENTIFICATION :');
+  console.log('AUTHENTIFICATION :');
   if (metrics.successful_logins) {
     console.log(
       `   • Connexions réussies : ${metrics.successful_logins.values.count}`,
     );
   }
 
-  console.log('\n⏱️  PERFORMANCE :');
+  console.log('\nPERFORMANCE :');
   if (metrics.http_req_duration) {
     const avg = metrics.http_req_duration.values.avg.toFixed(2);
     const p95 = metrics.http_req_duration.values['p(95)'].toFixed(2);
@@ -180,7 +186,7 @@ export function handleSummary(data) {
     console.log(`   • Temps de réponse P95 : ${p95}ms`);
   }
 
-  console.log('\n✅ FIABILITÉ :');
+  console.log('\nFIABILITÉ :');
   if (metrics.checks) {
     const checkRate = (metrics.checks.values.rate * 100).toFixed(2);
     console.log(`   • Taux de réussite : ${checkRate}%`);

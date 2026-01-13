@@ -1,5 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 import { InjectQueue } from '@nestjs/bull';
 import type { Queue } from 'bull';
 

@@ -10,7 +10,7 @@ import { MarketDataModule } from './market-data/market-data.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
 import { AlertsModule } from './alerts/alerts.module';
 import { NotificationsModule } from './notifications/notifications.module';
-import { DatabaseModule } from 'libs/database/src';
+import { DatabaseModule } from '@app/database';
 import { PaymentsModule } from './payments/payments.module';
 import { PredictionsModule } from './predictions/predictions.module';
 import { PrometheusModule } from '@willsoto/nestjs-prometheus';

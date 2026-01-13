@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PortfolioService } from './portfolio.service';
-import { PrismaService } from 'libs/database/src';
+import { PrismaService } from '@app/database';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 
 describe('PortfolioService', () => {

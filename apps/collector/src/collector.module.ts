@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { ScheduleModule } from '@nestjs/schedule';
-import { DatabaseModule } from 'libs/database/src';
+import { DatabaseModule } from '@app/database';
 import collectorConfig from './config/collector.config';
 import { CoingeckoClientService } from './services/coingecko-client.service';
 import { DataTransformerService } from './services/data-transformer.service';

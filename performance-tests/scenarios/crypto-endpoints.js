@@ -7,7 +7,7 @@
  * ENDPOINTS TESTÉS :
  * - GET /cryptos              (liste complète)
  * - GET /cryptos/:id          (détails d'une crypto)
- * - GET /market-data/prices   (données de marché)
+ * - GET /market-data/:id   (données de marché)
  *
  * OBJECTIF : Vérifier la performance des endpoints métier critiques
  *
@@ -45,7 +45,7 @@ export const options = {
   },
 };
 
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'http://localhost:3000';
 
 // Liste de cryptos populaires à tester
 const POPULAR_CRYPTOS = ['bitcoin', 'ethereum', 'solana'];

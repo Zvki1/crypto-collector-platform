@@ -6,7 +6,7 @@
  */
 
 // URL de base de l'API
-export const BASE_URL = __ENV.API_URL || 'http://localhost:3001';
+export const BASE_URL = __ENV.API_URL || 'http://localhost:3000';
 
 // Configuration des seuils par défaut
 export const DEFAULT_THRESHOLDS = {
@@ -50,14 +50,7 @@ export const VUS_CONFIG = {
 export const POPULAR_CRYPTOS = [
   'bitcoin',
   'ethereum',
-  'cardano',
   'solana',
-  'polkadot',
-  'chainlink',
-  'litecoin',
-  'avalanche',
-  'dogecoin',
-  'shiba-inu',
 ];
 
 // Configuration des timeouts

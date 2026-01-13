@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PredictionsController } from './predictions.controller';
 import { PredictionsService } from './predictions.service';
-import { DatabaseModule } from 'libs/database/src';
+import { DatabaseModule } from '@app/database';
 
 @Module({
   imports: [DatabaseModule],
