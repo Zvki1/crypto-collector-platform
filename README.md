@@ -10,6 +10,8 @@ Ce projet est une application web complete permettant de suivre les cours des cr
 
 Le systeme collecte automatiquement les donnees de marche depuis l'API CoinGecko et les stocke pour permettre une analyse historique.
 
+## Demo 
+https://github.com/user-attachments/assets/4972619d-ffe1-4af0-9184-6ee7892ff706
 ---
 
 ## Fonctionnalites implementees
