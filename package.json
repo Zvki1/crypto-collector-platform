@@ -32,7 +32,7 @@
     "security:monitor": "snyk monitor"
   },
   "dependencies": {
-    "@bull-board/api": "^6.14.1",
+    "@bull-board/api": "^6.16.1",
     "@bull-board/express": "^6.14.1",
     "@bull-board/nestjs": "^6.14.1",
     "@nestjs/axios": "^4.0.1",
